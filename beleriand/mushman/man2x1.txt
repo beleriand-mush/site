@@ -1,0 +1,1775 @@
+MUSH Manual Version 2.008:
+   Copyright 1993, 1994, 1995, Lydia Leong (lwl@netcom.com / Amberyl)
+   Last revised 5/22/95.
+ 
+Section I: Getting Started. Basic commands and objects.
+
+Table of Contents:
+
+Introduction: A brief history of MUSH. Configurations and server differences.
+ 
+1. The Basics
+ 1.1  Some information
+        Common terms used on MUSHes.
+        The format of this manual.
+ 1.2  Getting started
+        Looking around: look, examine, @decompile, TERSE, MYOPIC, @grep
+        Communications: ", :, @emits, page, whisper, basic flags and @set,
+           HAVEN, GAGGED, NOSPOOF
+        Going places: JUMP_OK, @tel, @whereis, UNFINDABLE
+        Objects: get, drop, give, ENTER_OK, inventory
+        Command syntax, @set and flags, special commands, @list
+ 1.3  Attributes: @desc, @succ, @fail, @drop, @kill, IMMORTAL, @move, @sex
+ 1.4  Editing: @edit, @mvattr, @cpattr
+ 1.5  Do it!  --  basic character set-up
+ 1.6  A parser discussion
+2. Objects
+ 2.1  Basic object commands: @create, @destroy, @force, @name, VISUAL
+ 2.2  Puppets - the PUPPET flag. ROBOTs.
+ 2.3  A Note about Privacy: @sweep
+ 2.4  Attributes on Objects: Action Lists, @decompile, the parser
+ 2.5  Machines: @cost, @pay, and @clone, QUIET and DESTROY_OK flags, @parent
+ 2.6  Limiting object uses: @charges and @runout
+ 2.7  Reacting to the environment: @listen and @ahear, ^, LISTENER/MONITOR
+ 2.8  Keeping your objects safe: @lock, @unlock, @chown, CHOWN_OK, STICKY,
+         @search, @find, @stats
+ 2.9  Do it!  --  falcon
+ 
+INTRODUCTION:
+ 
+MUSH is a derivative of the original TinyMUD. In general, a MUSH is a
+place where players can hang out, socialize, program, and build. There
+are nearly four dozen public MUSHes running at the time of this
+writing. Most MUSHes use variants of either the PennMUSH 1.50 or
+TinyMUSH 2.0 servers (TinyMUSH 2.2 is derived from TinyMUSH 2.0);
+although behavior for all MUSH versions should be similar, code
+patches and unofficial modifications are very common, so what works on
+one MUSH won't necessarily work on another. This manual describes the
+"standard" behaviors for the official MUSH versions.
+
+MUSH looks very similar to the text adventure games that were popular
+in the mid-1980s. The difference between a MUSH and an Infocom game is
+the crudity of the parser, the user-extendibility, and the
+multi-player capability of the former. The programming language of
+MUSH is most similar to LISP, in its emphasis on lists and the way
+functions are evaluated.
+
+The MUSH code dates back to spring of 1990, or so. The only presently
+surviving MUSH from that era is TinyTIM. Somewhat later came
+MicroMUSH, and TinyCWRU. All three were based off the original
+TinyMUSH, which was a heavily modified TinyMUD, done by Lawrence
+Foard.
+
+In January of 1991, PernMUSH was started, using MicroMUSH code as a
+base. Moonchilde began to distribute PernMUSH code a little while
+later, while MicroMUSH became MicroMUSE. In the spring, the 2.0
+rewrite project was started. MUSH had become a messy collection of
+hacks, and most of them were non-standard; JT Traub (Moonchilde of
+PernMUSH), Glenn Crocker (Wizard of TinyCWRU, Dave Peterson (Evinar of
+TinyDungeon), and some other programmers got together to completely
+rewrite the MUSH code.
+
+"Vanilla" MUSH code - the unadulterated original by Larry Foard - is a
+relic of the past; the MicroMUSH code off which PernMUSH is based has
+also essentially disappeared. TinyTIM has never distributed its code,
+and is significantly different from the other existing MUSH
+codes. These three MUSH versions, therefore, are not covered in this
+manual.
+
+PernMUSH switched to 2.0 code in November of 1991. The 1.x code
+fragmented into three versions - Spellbound, based off PernMUSH 1.13,
+SouCon, based off PernMUSH 1.14, and PennMUSH, based off PernMUSH
+1.15, Moonchilde's final distribution. Only the last still exists, and
+it was the only one of the three versions to be publicly distributed;
+the name was changed to "Penn" to avoid confusion, since PernMUSH
+itself switched to using 2.0 (and now, 2.2).
+
+In the fall of 1994, a number of wizards from large MUSHes got
+together to discuss the difficulties of TinyMUSH 2.0. TinyMUSH 2.0
+releases over the past year had been, by and large, fairly buggy, due
+to lack of testing in a "production MUSH" environment (one open to
+large numbers of players). Furthermore, gripes about the bugs
+introduced with new "features" resulted in the virtual end of
+development of new features. It was decided to begin work on a server
+development project, called TinyMUSH 2.2 (there had been an aborted
+TinyMUSH 2.1 project which attempted to use the UnterMUD OIF format
+for a database). TinyMUSH 2.2 is more a continuing of TinyMUSH 2.0
+development than an actual new server. It is the pet project of Jean
+Marie Diaz (Ambar of PernMUSH), Devin Hooker (Tyleet of Two Moons),
+and Lydia Leong (Amberyl of PernMUSH), in conjunction with a number of
+other helpful people. Every reference to TinyMUSH 2.0 in this manual
+also applies to TinyMUSH 2.2, unless specifically stated otherwise.
+
+This manual is being written specifically for the PennMUSH 1.50 and
+TinyMUSH 2.0 / TinyMUSH 2.2 code releases, currently available via
+mellers1.psych.berkeley.edu, caisr2.caisr.cwru.edu, and
+ftp.cis.upenn.edu, respectively. Should you wonder at the references
+to dragons and similar objects throughout this manual, realize that
+the examples were originally written to fit the world of PernMUSH,
+presently located at astral.magic.ca 4201; as this manual has
+evolved, other examples from other worlds, such as The Belgariad (once
+at csa.bu.edu 4201) were thrown in, together with more generic
+objects.
+
+If you're trying to program any flavor of MUSH besides TinyMUSH 2.x,
+or a MUSH version earlier than 1.16, you are better off getting
+the version 1.15 of the Pern manual (mushman.1.15.shar.Z, probably
+located at the same place you got this manual). This manual is more
+detailed than that one; it is intended to cover MUSH programming
+extensively. I have tried to make the examples useful; if you work
+through the manual's Do It! sections, whether or not you completely
+understand them, you should have some rooms built for a house, a
+falcon, a vehicle, and some assorted other useful objects.
+
+Please note that the 2.0 examples in this manual assume that your MUSH
+has a certain set of "common" aliases and command options. TinyMUSH
+2.0 is highly configurable. If something doesn't work, or works
+differently from the way it is described in this manual, chances are
+that the configuration is different. The command "@list options" lists
+many of these options.
+
+Differences between 1.50 configurations are generally less visible,
+and generally only affect the way things are displayed, or the
+internals of the server, instead of directly changing the behavior of
+a command (for example, whether @switch matches all cases or just the
+first one).
+
+There are three major mailing lists set up for MUSHers. They are:
+tinymush-programmers@cygnus.com (for MUSH programmers and general
+users), mushhacks@caisr2.caisr.cwru.edu (server hackers for TinyMUSH
+2.0), and pennmush@med-itvax1.bu.edu (server hackers for PennMUSH
+1.50).  To join one of the lists, mail <list name>-request@sitename
+with a subscription request (i.e., to join mushhacks, send email to
+mushhacks-request@caisr2.caisr.cwru.edu).
+ 
+   --  Amberyl (lwl@netcom.com)
+ 
+---------------------------------------------------------------------------
+ 
+1. The Basics
+ 
+1.1	Some information
+ 
+These are terms which are in common use and which you should know:
+ 
+Player: the person who is reading this manual.
+Character: the virtual-person who wanders around the MUSH under the control
+	of the player.
+Puppet: an object that is under the control of a character, who can see and
+	perform actions of its own.
+Robot: something which appears to be a character, but is actually an
+	external program, usually written in C or LISP, which, when run,
+	connects to a remote computer and pretends to be a player. Some are
+	quite sophisticated. This word is also used to refer to objects which
+	are programmed, using MUSH code, to behave like players, or to perform
+	a specific function, like deliver mail. Sometimes robots will be
+	referred to as 'bots.
+Machine: Objects which are programmed to do certain things, like dispense
+	mugs of klah, or repeat the word "Die" every five minutes, or any one
+	of a thousand different possibilities. The second type of robot
+	mentioned above is a type of machine.
+Flag: Something which controls behavior of an individual object. It can
+        be either on or off, and usually affects the kind of output the
+        object sees/gives. The '@set' command is used to turn a flag on
+        or off on a particular object. A frequently used terminology in
+        this manual is "<object> is [not] set <flagname>".
+        "Joshua is set OPAQUE" simply means that 'Joshua' has the 'OPAQUE' 
+        flag set on himself (i.e. it is turned on).
+Object Type: Objects are classified into one of four types: PLAYER, THING,
+        ROOM, or EXIT. A 'player' is something which can be connected to
+        via a name and password, who can own things and functions 
+        independently of anything else in the game. A 'thing' is a mobile
+        object, which can be picked up, dropped, and manipulated in various
+        ways. An 'exit' is a link which connects two locations in the game.
+        These locations are normally known as 'rooms'. (You can be inside
+        a thing, too, but a 'room' is the basic unit of building).
+        In this manual, 'object' and 'thing' are sometimes used generically
+        to refer to objects of any type.
+Dbref: Every object in the database is assigned a number, called a
+        "database reference number", or "dbref" for short. A hash sign
+        normally prefixes a dbref, i.e., "#100". The dbref is the object's
+        unique identifier (unlike its name, which could be the same as 
+        that of many other objects).
+Client: a program which replaces telnet. Clients are designed specifically
+	to connect to MUDs, and frequently provide many features that are not
+	available with ordinary telnet, such as macros, logging, hiliting,
+	and the ability to switch between several worlds very quickly. Two
+	popular clients are TinyTalk and TinyFugue. The latter is an improved
+	version of the former. Both run under UNIX.
+Mark: the unit of currency on Pern. Other places use Pennies, Credits,
+	Dollars, or even Cookies. The cost of an action varies from nothing to
+	100 Marks, for commands which are computationally expensive. Players
+	normally get a certain amount of money every day.
+God: the person who is, overall, in charge of the MUSH. He is generally
+        responsible for code maintenance and general order. He has powers
+        not available to anyone else, and may not be @forced by anything.
+Wizard: a game administrator, picked by God to help run the game. Wizards
+        control all objects, and have special commands available to them.
+        Wizards cannot hear things that ordinary players cannot.
+Royalty: a game administrator, a kind of "sub-wizard". Royalty can see all
+        objects as if they controlled them, but cannot change them.
+Mortal: a non-wizard, non-royalty player.
+Control: Every object in MUSH is controlled by one or more things. Players
+        always control the objects they own. Wizards control everything.
+        There are other ways to control objects; these will be explained
+        later.
+
+Commonly used abbreviations:
+  IMHO: In My Humble (or Holy) Opinion
+  RL: Real Life. The world outside MUDs.
+  VR: Virtual Reality. The MUD world or worlds.
+  OOC: Out of Character. Used when the player rather than the character
+       is the one speaking, such as when a dragonrider character on PernMUSH
+       wishes to comment on the features of the latest SPARC station.
+       The opposite of this is 'IC' -- 'In Character'.
+  LOL: Laughs Out Loud.
+  ROTFL: Rolls On the Floor Laughing.
+ 
+Now that the definitions are out of the way:
+ 
+Examples in this manual will be set off by  [ Example Number ] at the
+beginning and = signs around the example. Words that appear in <  >
+aren't supposed to be typed in literally. For example, if I use
+"<your name>", don't type that, but type your name instead. In examples,
+lines that begin with "> " indicate something that I've typed in.
+Words that appear in [ ] are optional; for example, if I use
+"examine[/brief]", you could either type "examine" or "examine/brief".
+Everything else is the MUSH's response. The 'main character' used in the
+examples is Elsa, on PernMUSH. Various other characters are used as
+props throughout the manual; most of them are PernMUSH players who have
+contributed in some way to this manual and are thus being immortalized
+by way of thanks.
+
+
+1.2	Basic Commands
+ 
+Looking around:
+
+The "look" command (abbreviated "l") allows you to look at your
+surroundings. "Look" by itself shows you the description of the room
+you are in. "Look <object or exit>" shows you the description of that
+object or exit. You may specify a thing by its name, its dbref number,
+as *player, or as "me" or "here". "Read" is identical to look in all
+respects.
+
+Possessive "look" allows you to look at something that someone or
+something is carrying. The syntax is just: "look <object>'s <thing>".
+You cannot look at someone's inventory if they are set OPAQUE or DARK.
+(OPAQUE and DARK are flags, and will be explained in more detail
+later.)
+
+You automatically "look" at every room you enter. If you are trying to
+move rapidly through familiar areas, you may want to set yourself
+TERSE.  This flag suppresses room descriptions and room success/fail
+messages; the MUSH will display only the location name, its contents,
+and the obvious exits.
+
+The MYOPIC flag prevents you from seeing the dbref numbers and flags
+on objects that you control. If you like your output "pure", you may
+wish to set yourself MYOPIC.
+
+* * * * *
+
+The "examine" command (abbreviated "ex") provides more detailed
+information about an object. If you do not control the object, this
+command will tell you who the object is owned by, and (in some
+configurations) show you any public attributes on that object, such as
+the desc, sex, and "last" connect time. If you are in the same room
+with the object, and the object is neither DARK nor OPAQUE, you are
+also shown the list of all its non-DARK contents, and any non-DARK
+exits. You can also use "examine/brief" to see just the owner's name.
+
+1.50 has the "brief" command. This is like "examine", except
+that brief shows all object information EXCEPT for attributes.
+
+In 2.0, if the config directive "examine_public_attrs" is on,
+normal players will trigger the looked-at object's adesc when they 
+examine/full the object, if the object is in the same room. Wizards, 
+however, do not trigger this.
+        
+If the object is not in the same room, you do not control it, and the
+"examine_public_attrs" config directive is off, you will see <Too far
+away to get a good look> instead of the description, and cannot get a
+contents list, although you will still see other public attributes and
+the owner's name.
+
+If you own the object or the object is set VISUAL, examine will show
+you the full list of attributes on the object, and other properties on
+it.  To see a specific attribute, "examine object/attribute".
+
+You may use wildcards - * and ? - in examine, to match a group of
+attributes. The '?' wildcard matches any single character (but must match
+at least one character); the '*' wildcard matches any number of characters
+(including "none"). For example, "examine object/v*" would show all
+attributes on an object whose names begin with v. "examine object/???"
+would match those attributes whose names are exactly three letters long.
+"examine object/a?*" would match those attributes whose names are at least
+two letters long and begin with 'a'.
+
+In 1.50, if you are set ANSI, the names of attributes and the dbref of
+their owners will be hilited in boldface. This makes the boundaries
+between attributes clearer, preventing large MUSHcode objects from
+looking like several pages of random characters.
+
+* * * * *
+      
+In 1.50, the @grep command can be used to search for a certain
+pattern on an object. Doing a "@grep <object>/<attributes> = <pattern>"
+prints a list of all attributes on <object> which contain text matching
+<pattern>. This <pattern> may contain wildcards. <attributes> is a 
+possibly wildcarded pattern of attributes to match (like that for "examine"
+above). If you merely do "@grep <object>=<pattern>", the game assumes
+that you want to search all the attributes on <object>.
+
+@grep can take one of two switches, "list" or "print". The default is
+"list", which just returns the list of attributes that match the
+pattern.  The "print" option can only be used if you are set ANSI. It
+prints out all the attributes which contain the pattern, hiliting the
+text which matches the pattern in boldface.
+
+MudCore provides a similar command, called +grep. This performs a
+similar task, though it only prints out the list of attribute names
+that contain the pattern, rather than printing out the attributes
+themselves. The syntax is, "+grep <object>[/<attributes>] = <pattern>".
+
+MudCore also provides another useful command for listing the attributes
+on an object, called +lattr; it displays the attribute names, and the
+first line of text in that attribute. The syntax for this is,
+"+lattr <object>[<attributes>]". The command also takes several
+switches, which restrict the attributes displayed to those of certain
+types (attributes which are $commands, ^monitors, globally-defined,
+or none of the above).
+
+* * * * *
+
+The "@decompile <object>" command, when executed on an object that you
+own, outputs the sequence of commands you would need to type in order
+to duplicate that object. It may be used on any type of object.
+        
+@decompile is very useful for creating files which can be uploaded
+onto another MUSH. To combine @decompile with TinyFugue, use the
+following sequence of commands (presuming you want to save an object
+called "Test" to a file called "testfile", and then upload it to
+another MUSH called "NewWorld").
+
+/wrap off             [ in TinyFugue 3.0 and later:  /set wraplog 0 ]
+/log testfile
+@decompile Test
+/nolog
+/world NewWorld
+/quote 'testfile
+/wrap on              [ in TinyFugue 3.0 and later:  /set wraplog 1 ]
+
+This sequence does the following:
+
+1. Turn off wordwrap so extra newlines aren't inserted into the output.
+2. Save MUSH output to a logfile.
+3. Decompile the object.
+4. End saving of MUSH output to a logfile.
+5. Log onto a new MUSH.
+6. Upload the object to the new MUSH.
+7. Turn wordwrap back on.
+
+This method allows you to easily transport objects across MUSHes.
+Also, if the game should unexpectedly crash, or the database gets
+corrupted, or some other disaster occurs which causes you to lose the
+original copy of the object, all you have to do is upload it
+again. You should always try to @decompile any objects that are
+especially valuable to you, and store them off-line, in case of
+such a disaster.
+
+			----------
+
+Communications:
+
+You can speak using "say <message>", or by typing a double quote
+followed by the message (with no space after the "). Your name and the
+word "says" will be appended to the beginning of the message. A
+trailing " will be automatically added to the end of your message;
+don't type one in.
+
+You can pose (emote) using "pose <action", or by typing a colon
+followed by the message (i.e., ":<action>"). Your name and a space
+will be automatically added. If you want to avoid the added space, use
+"pose/nospace <action>", or a semi-colon followed by the message
+(i.e., ";<action>"), or a colon followed by a space and then the
+message (i.e., ": <action>"). This is useful for doing possessives and
+similar things.
+	
+In 1.50, most messages like "<person> <speech action> <message>" will
+include a comma - i.e, 'Annalyn says, "Hi."' or 'Annalyn whispers, "Hi."'
+In 2.0, this comma is missing, for historical reasons.
+
+* * * * *
+
+In 1.50, if you want to send a private message to yourself, you
+can "think <expression>". Pronoun substitution and function evaluation
+is performed. The equivalent command for 2.0 is "@pemit me=<expression>";
+you can achieve a similar effect with "@pemit/silent me=<expression>"
+in 1.50, but "think" is easier to type.
+
+There will be many times when you wish to communicate privately.  The
+commands "page" and "whisper" (abbreviated "p" and "w") are used for
+this, as in, "page <person>=<message>" or "whisper <person>=<message>". 
+Whisper sends a private message to a person who is in the same room as
+you. In certain configurations, people in the same room also see that
+you whispered something to that person; most MUSHes, however, do not
+use this "noisy" form of whisper. The page command sends a private
+message to a person on the MUSH; you can use it to talk to someone in
+a different room. The cost of page varies from MUSH to MUSH.
+
+You can whisper and page poses to people, by using a ":" in front
+of your message. If you whisper a pose to someone, you are told,
+"<Person you posed> senses "<Your name> <pose>".  The person sees,
+"You sense <Person who posed> <pose>". If you page a pose to someone, you
+are told, "Long distance to <Person you paged>: <Your name> <pose>"
+The person sees, "From afar, <Person who paged> <pose>".
+
+Partial name-matching is performed on "page". You only have to type 
+as many letters of the name as needed to distinguish it from the other 
+players connected (for page) or the things in the room (for whisper). 
+
+"Lastpage" is supported in 1.50; to send a message to the person that
+you last paged, type "p =<message>" or "p <message>". "p" by itself
+will tell you the name of the person whom you paged last. Try to be
+careful with this, since it's easy to mis-type when trying to page
+someone different and accidentally sending the message to the wrong
+person (this happens a lot when people substitute '-' for the '=',
+accidentally).
+
+There are two ways to block pages in 1.50. The HAVEN flag, when 
+set on a person, prevents them from receiving pages or @pemit *player 
+messages. Alternatively, the use of a page lock prevents those who do not
+pass the lock from paging the player. Anyone who pages a HAVEN player is 
+told, "That player is not accepting any pages."  Anyone who fails the page
+lock will be told, "That player is not accepting your pages."  If the target 
+player has a @haven attribute set, the message in that attribute is sent to 
+the paging player. The HAVEN player does not receive any notification that 
+someone tried to page him.  See the section on locks for instructions on
+how to set a page lock.
+
+In 2.0, only page locks can be used to block pages. Players who fail
+the page lock will be told, "That player is not accepting pages.", or,
+if the target player has a @reject attribute set, the message in that
+attribute.
+
+Specifically, to prevent a single person from paging you, use,
+"@lock/page me=!*<player>". To prevent everyone except a single
+player from paging you, "@lock/page me=*<player>". To prevent
+everyone from paging you, "@lock/page me=#0".
+
+If you set an @idle attribute on yourself, anytime someone pages you,
+they will have that idle-message sent to them, and you will be
+notified that they have received it, together with a timestamp. This
+is very useful if you are unexpectedly called away from the keyboard
+and want to know when people paged you, while politely notifying them
+that you aren't there.
+
+If you sent an @away attribute on yourself, if someone tries to page you
+when you aren't connected, they will receive that message. Customarily,
+this is used to tell people where you might be, when you will be back,
+and where you can be contacted.
+
+* * * * *
+
+The GAGGED flag, when set on a person, prevents him from doing
+anything but moving and looking. This flag may only be set by wizards,
+and is used as a punishment for players who are being particularly
+obnoxious.
+
+Related to GAGGED is the SLAVE flag. It prevents the player from using
+any commands that change the database. It may only be set by wizards.
+
+Flags will be explained in more detail later.
+
+* * * * *
+
+The "emit" family of commands prints things without any name
+prepended. This is handled by switches (the basic command name is
+followed by a slash and the switch name) added to the commands @emit,
+@oemit, and @pemit. In 1.50, and in many configurations of 2.0, these
+command-switch combinations are aliased to shorter commands.
+
+The basic command is "@emit <message>". The message will appear
+exactly as you have typed it. Everyone in the room, including you,
+will see the message.
+
+In 2.0, normal "@emit" is shorthand for "@emit/here". An alternative
+way of doing emits is "\\<message>". There should be no space between
+the "\\" and the message. Also, two "\"s are necessary because \ is
+used as an escape character.
+
+@emit has another switch, "room". "@emit/room" is often aliased to
+"@lemit". It shows a message to the outermost room you are in (the
+"absolute room"). For example, if you are in a chair inside a wagon
+inside a room, and you perform this command, the message is shown to
+the room, not to any of the intermediate objects. There is a limit of
+twenty intermediate layers.
+
+Related to the @emit command are @pemit and @oemit, and their
+variations.  "@pemit <player>=<message>" will emit a message to a
+single person. If the person is in a different room, you must use
+"@pemit *<player>=<message>". In 2.0, this normal @pemit is shorthand
+for "@pemit/object". In 2.0, you are not told when you @pemit to
+someone; certain configurations of 1.50 will notify you that you
+@pemit'ed the message. In those configurations, using @pemit/silent
+will eliminate the notification.
+
+"@oemit <player>=<message>" will emit the message to everyone in the
+room the @oemit'ing object is in, except the named player.  1.50 also
+permits "@oemit <room>/<player>=<message>", which emits the message to
+everyone in <room> but <player>; the @oemit'ing person must control or
+be in <room>. This latter form of the command is somewhat unnecessary,
+and thus non-existent, in 2.0; if it can locate where the named player
+is, the message will automatically go to that room.
+
+"@pemit/contents <object>=<message>" will emit a message to everyone
+in a room or container object, as well as to the container
+itself. @pemit/contents is generally aliased to @remit.  The <object>
+is generally a dbref number or *player; if the object is a player,
+@remit to that player will show the message to all that the player is
+carrying, as well as the player himself. Note that @pemit without the
+/contents switch does not show a message to anything a player is
+carrying, unless the player is set with a @listen attribute of "*".
+
+"@pemit/list <list of dbrefs>=<message>" will emit a message to a list
+of objects. These objects must be specified by their dbref numbers.
+This version of the command may also be combined with the /contents
+list, to send a message to several rooms.
+
+@emit, @pemit, @oemit, and @emit/room do not prepend the name of the
+player using the command. If you want to see where these @emit
+messages are coming from, you should set yourself NOSPOOF.
+
+In 2.0, NOSPOOF tells you the origin of any output that did not
+originate with you, directly or indirectly (i.e. you or an object that
+you @forced). If the origin is a player, "[PlayerName(#dbref player)]"
+will be prepended to the message. If the origin is an object, 
+"[ObjectName(#dbref object){PlayerName}<-(#dbref forcing object)]"
+will be prepended by the NOSPOOF indicator. The forcing object may
+be a controller object, the player himself, or a wizard. It is the
+object which caused the command to be executed.
+
+In 1.50, NOSPOOF tells you the origin of any type of @emit, whether
+or not you or one of your objects is responsible for it. It prepends
+"[<object name>]" to the output (or, if the configuration directive
+"PARANOID" is on, "[<object name>(<dbref number>)]")
+
+In 2.0, the HAVEN flag does not block out any type of @emit, though
+page locks will block @pemit and its relatives @pemit/contents
+(@remit) and @pemit/list; in 1.50, the HAVEN flag blocks @pemit and
+@remit to players. 1.50 page locks do not block emits of any sort.
+
+			----------
+
+Going places:
+
+The @teleport command allows you to move to a different location
+instantaneously. Two criterion have to be passed in order for you to
+be able to teleport to a location: you must pass the room's teleport
+lock, and the room must either be JUMP_OK or controlled by you.  You
+can teleport to a location by using "@tel <room number>".  You can
+teleport objects that you own, using "@tel <object>=<room number>". If
+you have an unwelcome guest or object in a room that you own, you may
+teleport that thing to any JUMP_OK location. You may also teleport the
+thing to another room that you own or through an exit that you own.
+
+In 1.50, and older versions of 2.0, you can find out where a player is
+with the command "@whereis <player>". The player will be told, "<Your
+name> has just located your position."  @whereis will give you the
+name of the player's location, and, if the room is JUMP_OK or is
+controlled by you, the number of the location. If you can teleport to
+that room, you can go to the player by using "@tel loc(*player)".
+
+Some people find being "@whereis"'ed annoying. Generally, it is rude
+to "@whereis" people that you don't know, or to "@whereis" them
+without following up with a page message of some sort, explaining why
+you wanted to know their location.
+
+Players can prevent others from finding out where they are by setting
+themselves UNFINDABLE. In this case, the locating player is told,
+"That player wishes to have some privacy."  and the player who is set
+UNFINDABLE is notified, "<Your name> tried to locate you and failed."
+
+The UNFINDABLE flag can also be set on rooms. Anything inside an
+UNFINDABLE room cannot be located by mortals. Paranoid players and
+those having super-secret meetings may like this flag.
+
+Sometimes, there are objects in a room which you may wish to enter,
+such as a dragon. You can use "enter <object> to enter an object, provided
+that you pass the enter lock on the object, and it is ENTER_OK or owned by 
+you.  In order to get out of the object, use "leave".  In 2.0, you must
+pass the leave lock in order to do this.
+
+You can put enter and leave aliases on objects. The words stored in
+the @ealias and @lalias attributes on an object may be used in place
+of "enter <object>" and "leave". For example, if a chair has the
+@ealias "sit" and the @lalias "stand", "sit" may be typed in place of
+"enter chair" and "stand" may be typed in place of "leave".  You can
+use multiple aliases by making them semi-colon separated, like exits
+are: "@ealias chair = sit down;sit;sit on chair" allows one to type
+"sit down", "sit", or "sit on chair" to enter the chair.
+
+			----------
+
+Objects:
+
+Picking up and dropping objects is easy - simply "get" or "drop" the
+appropriate object. Possessive "get" also works - you can take from
+something using "get <thing>'s <object>". The thing that you are
+taking the object from must be ENTER_OK, and the object must not be
+locked against you.  Also note that this applies to taking from
+non-room objects in general; if you are inside a thing, you will not
+be able to pick up obejcts inside of it unless it is ENTER_OK or you
+control it.
+
+You can give someone an object or money by using the "give" command,
+i.e., "give <person>=<object>" or "give <person>=<amount of money>".
+In 1.50, the person must be set ENTER_OK in order for them to receive
+things.  In 2.0, the giver must also pass the recipient's ReceiveLock,
+and the giver must pass the objects' GiveLock.
+
+To get a list of objects you are carrying, do an "inventory"
+(abbreviated "i"). This will show everything you are currently
+holding, including DARK objects owned by other players.
+
+			----------
+
+Summary of command syntax:
+
+The basic commands for looking, moving, etc. are few in number and
+easy to remember. More complex commands, which generally are used to
+change the database, begin with the "@" symbol.
+
+Many commands have "switches" which change the meaning of the command
+somewhat. "Examine" is one such command, with /brief and /full
+switches. All commands with switches have a default. In 2.0, if a
+command has more than one switch which are not mutually exclusive, you
+may use several switches at once by doing command/switch1/switch2/etc.
+1.50 also allows for switches, but you can only give one switch to a
+command at a time.
+
+Flags, mentioned repeatedly above, are used for a wide variety of
+purposes. They are either on or off, with "@set <object>=<flag name>" to
+turn one on and "@set <object>=!<flag name>" to turn one off.
+
+Finally, three commands are extremely useful: WHO, LOGOUT, and QUIT.
+The WHO command, for ordinary players, shows the list of all non-DARK
+connected players, the time they have been on, the time since they
+last typed a command, and their @doing, which is a short string set by
+"@doing <message>". LOGOUT, which only exists in 2.0, disconnects a
+player from a character, returning him to the login screen. QUIT
+disconnects the player from the MUSH completely.
+
+There is an inactivity timeout. If you idle too long, the MUSH will
+disconnect you. The idle time allowed is generally one hour. It can be
+found by doing a "@list options" in 2.0, and an "@config" in 1.50.  In
+2.0, Wizards may change this value on themselves by setting their
+@timeout attribute. Wizards who exceed the inactivity limit for
+mortals are automatically set DARK. (In 1.50, this only occurs if the
+Wizard is already set UNFINDABLE).
+
+2.0's "@list" command can be used to find lists of all the commands,
+flags, attributes, configuration parameters, options, command
+switches, and other useful things. Typing "@list" by itself will give
+the options. The closest 1.50 equivalent to "@list" is @config, which
+outputs the important MUSH configuration parameters.
+ 
+===============================================
+[Example 1.2: Demonstration of Basic Commands]
+> "Hi, everyone.
+Elsa says "Hi, everyone."
+> :waves.
+Elsa waves.
+F'jon waves back.
+> ex/brief f'jon         [ 1.50: just plain "ex F'jon" ]
+F'jon is owned by F'jon
+> @emit The sun shines.
+The sun shines.
+> w f'jon=How are you?
+You whisper "How are you?" to F'jon.
+F'jon whispers "Fine."
+> p jyrax=Hello.
+You paged Jyrax with 'Hello.'.
+Jyrax pages: Hello!
+> @whereis Jyrax
+Jyrax is at: Ramp of Ruatha Hold.
+===============================================
+
+ 
+1.3	Attributes
+ 
+Attributes are places in an object where information can be stored.
+The most common are the desc, succ, fail, and drop attributes. Each of
+these have corresponding o- and a- attributes. For example, in addition
+to succ, there are osucc and asucc. O stands for Other, and A stands for
+Action. The name of the person who performed the action, and a space are
+automatically prepended to the beginning of every O message. This person
+is sometimes called the "enactor"; you will read more about enactors later
+on in this manual.
+
+The syntax for setting these and other standard attributes is
+"@<attribute> <object>=<message>", as in "@desc me=A young woman."
+
+"Desc" stands for Description. It is the message someone sees when they
+look at something. An "odesc" is seen by everyone but the person looking
+and the object being looked at. An "adesc" is the list of actions
+executed by an object when it is looked at.
+ 
+======================
+[ Example 1.3a: Desc ]
+> @desc me=Elsa is a slim young woman.
+Set.
+> @odesc me=looks at Elsa.
+Set.
+> @adesc me=:smiles.
+Set.
+[Now, if F'jon looks at me, he'll see: Elsa is a slim young woman.
+ When he does that, Jyrax, who is also in the room, will see:
+ F'jon looks at Elsa.]
+Elsa smiles.
+[Elsa's adesc forces her to do a pose, which is displayed to everyone,
+ just as if she had typed :smiles. as usual.]
+=======================
+
+Note that many people find @odescs and @adescs rather irritating.  In
+general, one should never use both (the above is for demonstration
+purposes only). If you want to be notified that a person is looking at
+you, one useful thing is: "@adesc me=@pemit me=%N just looked at you."
+(or, in 1.50, "@adesc me=think %N just looked at you.")  The
+abbreviation %N is explained in detail later; it means "eNactor Name",
+and is the name of the person who triggered off the action.
+ 
+Succ is short for success, and is the message seen by someone when
+he successfully use something. Succ on an object is displayed when that
+object is picked up. Succ on an exit is displayed when something walks
+through it successfully. Succ on a room is displayed when someone looks
+at it, under normal circumstances. An osucc is shown to everyone else in
+the room, and an asucc is the action list taken when something is
+successfully used.
+ 
+======================
+[ Example 1.3b: Succ ]
+> @succ me=You lift up Elsa.
+Set.
+[ Now, when F'jon does a 'get Elsa', he sees, 'You lift up Elsa.'
+  Elsa is now in F'jon's inventory, being carried around. ]
+======================
+ 
+Fail is short for failure, and is the message seen by someone when
+he fails to successfully use something. Usually something fails to work
+because it is locked. (Locks will be explained in detail, later).
+Fail basically works like succ does.
+
+Drop is seen by the person who drops an object. Odrop and adrop have
+two uses: normally, they are performed when someone drops something, but
+an odrop on an exit is shown to the people in the room that a person
+enters (as opposed to an osucc, which is shown to the people in the room
+that a person leaves).
+
+===============================
+[ Example 1.3c: Fail and Drop ]
+[In the previous example, Elsa was picked up by F'jon. She's decided that
+ she didn't much care for that, so she's going to take some action:]
+> @lock me=me
+Locked.
+[This prevents anyone from picking Elsa up in the future.]
+> @fail me=Elsa glares at you.
+Set.
+> @odrop me=drops Elsa, who looks rather irritated.
+Set.
+[Now, when F'jon types 'drop Elsa' he just sees "Dropped." since Elsa did
+ not set a drop message on herself. Jyrax, however, sees: "F'jon drops
+ Elsa, who looks rather irritated."  Elsa doesn't get any message, except
+ for the description of the room she's dropped into.]
+[F'jon tries to pick up Elsa again, but this time, she's locked, and
+ 'get Elsa' shows him the message, "Elsa glares at you."]
+===============================
+
+
+The @succ and @drop family of attributes is triggered in one
+more case - when objects are given. The giver triggers off the @drop
+family of attributes; the recipient triggers off the @succ family.
+
+* * * * *
+
+There is another attribute, kill, which is used when something is
+killed. To kill something, use "kill <thing>=<money>". For every Mark you
+spend, you have an additional 1% chance to kill the object. The default
+cost of killing something is 10 marks. Spending 100 Marks always works.
+Killing something halts it and sends it home, and pays it half the amount
+of money that was used to kill it. It also triggers the @kill, @okill, and
+@akill attributes (@death, @odeath, and @adeath in 1.50).
+
+Killing is usually strongly discouraged. Certain things, like wizards,
+cannot be killed. Objects with the IMMORTAL flag (or, in 1.50, with the
+Immortal power) cannot be killed, but this privilege can only be granted
+by a wizard.
+
+* * * * *
+
+The "move" set of attributes are used when something moves from one
+location to another, no matter what the means of moving - going
+through an exit, entering/leaving an object, going home, or
+teleporting. The @move, @omove, and @amove attributes can only be set
+on players and objects.
+
+There is also a set of attributes specifically for messages sent when
+a @teleport is done. The @tport, @otport, and @atport attributes are 
+used when you arrive at your new destination. The @oxtport works like
+the @otport does, except the message is shown to the others in the
+room that you just left. There is no @xtport or @axtport.
+
+* * * * *
+
+In 2.0, there are a large number of other attributes related to
+succeeding or failing in attempts at various commands (usually related
+to passing the appropriate lock). Only the "basic" form of the
+attribute is listed in the table below; prepend "O" or "A" to it to
+get the other forms.
+
+@tfail:  failure in teleportation
+@dfail:  failure to drop an object
+@gfail:  failure to give an object
+@rfail:  failure to receive an object when it is given
+
+The only one of these which can easily be simulated in 1.50 is @tfail;
+to get the effect of @tfail, use the "@efail" set of attributes.
+
+* * * * *
+ 
+The final attribute is not like the others. It's the sex attribute,
+which is used for pronoun substitution, and lets you declare your gender.
+The syntax is "@sex me=<male or female>". You don't have to make yourself
+male or female, but it's strongly suggested. The gender "plural" is
+also supported in 2.2, and modifies the grammar of messages appropriately.
+
+There are more attributes, but these are the standard ones.  Certain
+MUSHes may add their own global attributes, such as "EMAIL".  It is
+also possible to make up attributes with arbitrary names, using "&" as
+the beginning of the name rather than "@".  These user-named
+("non-standard") attributes are described in greater detail later in
+this manual; for now, just note that attribute sets of the format
+"&<attribute name> <object>=<value>" are valid and set <attribute name>
+on <object> with some text string <value>.
+
+
+1.4     Editing
+
+One rather useful command is @edit. This allows you to perform a
+substitution on an attribute, so you can correct typos without having to
+retype the entire thing. The syntax for this command is:
+@edit <thing>/<attribute>=<old string>,<new string>
+
+If <old string> is the character ^ by itself, <new string> will be
+prepended to the contents of <attribute>. If <old string> is the
+character $ by itself, <new string> will be appended to the contents
+of <attribute>.
+
+If commas, brackets, parentheses, percent signs, and other 'special
+characters' appear in either string, curly braces { } must be used to
+set each string off.
+
+If <attribute> is a wildcard pattern, the @edit command does a
+global replace for all attributes that match the pattern; for example, 
+@edit object/v*=a,b  would replace the letter a with the letter b
+in all attributes whose names begin with v, in the object.
+
+Certain types of patterns are extremely difficult to edit; these are
+usually patterns which include the { or } characters, which are "special"
+to @edit. Several methods exist to get around this problem; one is to
+generate the string using edit(); the other is to take advantage of
+some features of a client such as TinyFugue.
+
+In TinyFugue, type, exactly as printed:
+
+/def redit = /grab $(/recall %{0-1})
+
+This command allows you to pull into your input buffer any number of lines
+which could normally be obtained via the /recall command in TinyFugue.
+This allows you to edit text that has already been displayed to you.
+
+Therefore, to directly edit an attribute within TinyFugue, one can type,
+"examine <object>/<attribute>" and then "/redit 1" to edit the text which
+is then displayed.
+
+* * * * *
+
+To copy an attribute from one object to another, you can use:
+@force me=&attrib1 object1=get(object2/attrib2)
+
+It is also possible to copy attributes via a version of the @set command:
+@set <new obj>=<new attrib>:_<old obj>/<old attrib>
+This copies <old attrib> from <old obj>, setting it into <new attrib> 
+on <new obj>.
+
+This somewhat clumsy method can be worked around by using a built-in
+command -- @mvattr, and, in 1.50, @cpattr.
+
+"@mvattr <object>=<old name>,<new 1>,<new 2>,<etc.>" will move an
+attribute.  Moving an attribute always wipes it out. If you want to
+copy the attribute, you must move it to itself as well, using
+"@mvattr <object>=<old name>,<old name>,<new name 1>,<new name 2>,<etc.>"
+
+In 1.50, there is, in addition to the @mvattr, a copy command: 
+@cpattr <obj>/<attr>=<obj1>/<attr1>,<obj2>/<attr2>,<etc.>
+This copies <attr> from <obj> to <attrN> on <objN>. You can specify a 
+large number of object-attribute pairs (limited only by the MUSH
+configuration, which is generally 100).  The original object-attribute
+pair is NOT wiped out. Also, even if one copy fails (you specified a
+non-existent object, or one that you don't control, etc.), the game
+continues to try to finish copying to the other object-attribute pairs.
+
+MudCore provides two alternatives: +cpattr and +mvattr.
+"+cpattr <obj>/<attr> = <obj1>/<attr1> <obj2>/<attr2> <etc.>" is
+more or less identical to the 1.50 @cpattr save in syntax.
+
+There are two forms of the +mvattr command, one which moves one
+attribute on an object, to another, and one which is used to move from
+one object, mass groups of attributes which match a certain wildcard
+pattern, to another object, keeping the attribute names the same:
+"+mvattr <obj1>/<attr1> = <obj2>/<attr2>" does the first, and
+"+mvattr <obj1>/<wildcard pattern> = <obj2>" does the second.
+
+ 
+1.5	Do it!
+ 
+Issue the following commands:
+@desc me=<description>
+@lock me=me
+@adesc me=@pemit %N=<Your name> smiles and returns your glance.
+@fail me=<message to show when someone tries to pick you up>
+@sex me=<male or female>
+@set me=enter_ok
+ 
+You are now described, safe from robbery, and have a proper gender.
+The adesc also allows you to see who is looking at you. (Don't worry
+about the %N; it will be explained later). Also, since you are set
+ENTER_OK, people can give you objects and money. One additional command
+you may wish to issue is "@lock/enter me=me", which prevents people
+from entering you.
+
+
+1.6     A parser discussion
+
+If you are completely new to MUSH, you may wish to skip this section
+and come back to it later. Also, if you're programming 1.50 or 2.0
+exclusively, you do not need to read this section, which explains
+parser and game output differences between 1.50 and 2.0.
+
+The command parsers for 2.0 and 1.50 are no longer significantly
+different. Nested brackets, evaluation of the S() and U() functions,
+and evaluation order should now be consistent.
+
+There are some differences in messages between 1.50 and 2.0,
+particularly in the building commands. Some of the more obvious ones:
+
+@create:
+  1.50   Created: Object <number>.
+  2.0    <Object> created as object <number>
+@clone:
+  1.50   Cloned: Object <number>.
+  2.0    <Object> cloned, new copy is object <number>.
+@destroy:
+  1.50   Halted.
+         You get your 10 pennies deposit back for <object>.
+         Destroyed.
+  2.0    You get your 10 pennies deposit back for <object>.
+         Destroyed.
+         <Object> has left.
+
+Errors in syntax are handled differently by the two parsers. Neither
+parser reacts well to missing curly braces, brackets, and
+parentheses. 2.0 in particular will often produce extremely garbled
+output if matching is not correctly done; if you are getting output
+from a 2.0 expression that begins with a large number of spaces and
+ends with a group of right braces, brackets, or parentheses, you
+almost certainly have a mismatch.  By contrast, 1.50 will generally
+return the string up the point of the mismatch. This difference in
+error handling should be noted by those attempting to debug code under
+two different versions.
+
+These differences, and some other minor cosmetic ones, will be
+encountered frequently in the text of this manual. If you are using
+1.50, please do not be alarmed at them.
+
+ 
+---------------------------------------------------------------------------
+ 
+2. Objects
+ 
+Objects, for the purposes of this discussion, are anything which are
+not rooms or exits. Players are very special kinds of objects, which
+have rules and restrictions in addition to those normally imposed on
+objects. Players cannot create other players (save for the wizard-only
+@pcreate command, discussed later).
+
+ 
+2.1	Basic object commands: @create, @destroy, @force, and @name
+ 
+The syntax for object creation is "@create <object name>=<cost>".
+If you do not specify a cost, the default is 10 marks. If you have enough
+money, the MUSH will respond "<Name> created as object <#dbref>" and the 
+object will be placed in your inventory. You may refer to an object either 
+by its name, or by its object number. The MUSH parser performs name matching,
+so after you create a Blue Tunic, for example, you can refer to it simply as
+"Blue," unless you have a Blue fire-lizard with you. In that case, you
+could use "Blue T" instead, or "Tunic."
+
+You can change the name of an object with "@name <old name>=<new name>".
+(This applies to things, exits, and rooms, not just things). Your name
+can be changed by "@name me=<new name>" (1.50 requires, for player
+name changes, "@name me=<new name> <password>").
+ 
+The syntax for object destruction is "@destroy <objectname>".
+@destroy may be abbreviated to @dest. In general, you may only destroy
+objects that you own. It is important that you destroy objects once
+you no longer need them, or they will clutter the database. MUDs have
+a history of going down due to database bloat, so it is important to
+try to conserve space. You will also get back whatever amount of money
+it cost you to create the object.
+
+If you want anyone to be able to destroy your object, you should set
+it DESTROY_OK. This is useful for objects which are meant to be
+temporary, such as messages.
+
+If you want to avoid accidental destruction of an object, you should
+set the object SAFE. This flag prevents the @destroy command from
+being used on the object; instead, you must use @destroy/override
+(@nuke). This overrides any protections on the objects, which include
+the SAFE flag, wizard ability to destroy objects they don't own, and
+wizard ability to destroy players.
+ 
+You can make an object do something by using "@force <object>=<action>"
+or "<dbref> <action>". The object behaves as if it had typed the
+command. There are some restrictions on this, involving the INHERIT flag,
+which will be explained later. Note that since the semi-colon character
+is used to delimit commands, use of it in a @force will be considered
+to separate different commands you want to force the object to do; if
+this is not what you desire, you must surround the string with { braces }.
+
+If you want someone else to be able to see the programming on one of
+your objects, set it VISUAL. The other person can then "examine" it.
+  
+=======================================
+[ Example 2.1: Basic object commands ]
+> @create Test Object
+Test Object created as object #8032
+> i
+You are carrying:
+Test Object(#8032)
+You have 168 Marks.
+> drop test
+Test Object has left.
+Dropped.
+> @force test=:bounces.
+Test Object bounces.
+> #8032 :rattles.
+Test Object rattles.
+> @set test=destroy_ok
+Set.
+> @destroy #8032
+You get your 10 Mark deposit back for Test Object.
+Destroyed.
+Test Object has left.
+=======================================
+ 
+
+2.2	Puppets
+ 
+Puppets are special objects which can hear and behave almost like
+normal players. They are under the control of a player, and relay back
+everything they see and do to that player.
+
+Objects that have the KEY flag set cannot be picked up by puppets.
+Exits set KEY cannot be used by puppets. In fact, more precisely,
+puppets are treated as if they cannot pass any @locks that might be
+set on those objects. This forces players to solve puzzles themselves,
+instead of having their puppets do all the dirty work. In 1.50, the
+KEY flag also causes objects to go home when the person carrying them
+goes home or teleports.
+ 
+=======================
+[ Example 2.2: Puppet ]
+> @create Test Puppet
+Test Puppet created as object #8051
+> @set test=puppet
+Test Puppet grows ears and can now hear.      [2.2: "is now listening"]
+Set.
+> i
+You are carrying:
+Test Puppet(#8051p)
+You have 168 Marks.
+> drop test
+Test Puppet>  Dropped.
+Test puppet has left.
+Test Puppet>  Elsa's Room
+Test Puppet>  This is a small, sparsely furnished room.
+Test Puppet>  Contents:
+Test Puppet>  Elsa
+Test Puppet>  F'jon
+Test Puppet>  Obvious exits:
+Test Puppet>  Out
+Test Puppet has arrived.
+Dropped.
+> @force test=:squeaks.
+Test Puppet squeaks.
+> #8051 out
+Test Puppet>  Corridor
+Test Puppet>  A long, featureless corridor.
+Test Puppet>  Contents:
+Test Puppet>  Jyrax
+Test Puppet>  Ball
+Test Puppet>  Obvious exits:
+Test Puppet>  Elsa's Room
+> #8051 :squeaks.
+Test Puppet>  Test Puppet squeaks.
+> #8051 get ball
+Test Puppet>  Taken.
+Test Puppet>  Jyrax says "Hello, Test Puppet."
+> @set #8051=!puppet
+Test puppet loses its ears and becomes deaf.  [2.2: "is no longer listening"]
+Cleared.
+=======================
+ 
+The puppet echoes back almost everything it hears. Note that when the
+puppet is in the same room as its owner, it does not echo back the
+output of commands like :. This feature prevents the puppet's owner
+from getting a lot of annoying echoed messages.
+
+Puppets and other objects that listen trigger the adescs of objects
+that they enter, either via teleport, or via enter. This is because
+they are considered to "look" at the object when they enter it.
+
+* * * * *
+
+Somewhat related to the PUPPET flag is the ROBOT flag. The ROBOT flag
+cannot be set like other flags are; instead, you must use the "@robot"
+command to create a robot. Something created via this command is a
+cross between a player and a thing. Like a player, it may be connected
+to and moved about independently. Like a thing, it owns no objects,
+and belongs to the player who created it. It is "officially"
+considered of type PLAYER.  Things which are set ROBOT cannot be
+picked up by robots; exits which are set ROBOT cannot be gone through
+by robots. This behavior is similar to KEY for puppets.
+
+The robot flag is useful if you are running a "real" robot (an
+external C or LISP construct), which needs to be a player, but still
+needs to be under your control. Also, a robot can use the OUTPUTSUFFIX
+and OUTPUTPREFIX commands, which many robot programs require.
+
+When you are not connected to the robot as a player, you can use it
+much like you would use a thing; for example, a robot may be set
+PUPPET.  Creating a robot (via "@robot <name>=<password>") isn't
+cheap, though; it will, on most MUSHes, cost you 1000 pennies. Once
+created, it isn't possible to get rid of the robot without asking a
+wizard to destroy it.
+
+ 
+2.3	A Note about Privacy: @sweep
+ 
+Occasionally, conversations of a private nature occur on MUDs. From
+time to time, the presence of a puppet is forgotten. The @sweep command
+shows everyone and everything in that room which is listening. Something
+is considered to be listening if it is: a connected player, a puppet, an
+object with a @listen attribute, an object with ^-listen patterns (explained
+later), an AUDIBLE object or exit, or an object which has a user-defined 
+command on it. The latter will be explained later.
+
+@sweep in 1.50 and 2.0 are significantly different, and so are
+discussed here separately.
+
+* * * * *
+
+2.0 @sweep will show the following types and output:
+
+Connected players. [player connected]
+Disconnected players. [player]
+Puppets belonging to connected players. [puppet(Owner name) connected]
+Puppets belonging to disconnected players. [puppet(Owner name)]
+Objects with a @listen or ^-pattern set. [messages]
+Objects with $commands set. [commands]
+Audible exits. [audible]
+Audible objects, if you are in the object. [audible]
+Parent objects. [parent]
+
+This type of sweep, the default, checks both your location and
+your inventory for listeners. There are also several switches for doing
+more specific sweeps. Note that specific sweeps only warn you about one
+form of listening - the form you are specifically sweeping for.
+You may, however, combine several switches to make a @sweep of whatever
+level of specificity you wish.
+
+@sweep/commands lists only objects which have $commands set -
+"[commands]" in the generic @sweep.
+
+@sweep/listeners lists only objects which have a @listen set -
+"[messages]" in the generic @sweep.
+
+@sweep/exits checks for AUDIBLE exits in the room.
+
+@sweep/players lists only players and puppets. It does not tell you
+if a player or puppet's owner is connected, although it does tell you the
+owner of a puppets.
+
+@sweep/connected lists only connected players and puppets belonging
+to connected players. It tells you who owns the puppets.
+
+@sweep/here checks your location but not your inventory. Its reverse,
+@sweep/inventory, checks your inventory but not your location.
+
+* * * * *
+
+1.50 @sweep will show the following types and output:
+
+Connected players.                          [speech]. (connected)
+Disconnected players.                       [speech].
+Puppets belonging to connected players.     [speech].
+Puppets belonging to disconnected players.  [speech].
+Objects with a @listen or ^pattern set.     [speech].
+Objects with $commands set.                 [commands].
+Rooms with a @listen or ^pattern set.       (this room) [speech].
+Rooms with $commands set.                   (this room) [commands].
+AUDIBLE exits, if the room is AUDIBLE.      [broadcasting].
+AUDIBLE objects, if you are in it.          (this room) [broadcasting].  
+
+1.50 "@sweep connected" will show the following types and output:
+
+Connected players.                          is listening.
+Puppets belonging to connected players.     [owner: <owner>] is listening.
+
+Both types of 1.50 @sweep check both location and inventory.
+1.50 will take the command switches "connected", "here", "inventory",
+and "exits", but not in combination.
+
+* * * * *
+
+MudCore provides a command called +awake, which is a much more paranoid
+version of @sweep; it allows you to discover not just objects which are,
+in actuality, listening, but objects which might be listening. It follows
+chains of message forwarding through AUDIBLE exits and @forwardlists,
+as well as objects in the inventory of other objects set with @listen "*";
+it thus allows you to discover just not what in the room might be
+broadcasting, but where it's broadcasting to. The command displays
+information in a tabular format, noting the Connected status of the
+owners of the objects.
+
+* * * * *
+
+Puppets on MUSHes may be set DARK, but that flag has no effect on
+them, just as it has no effect on a normal player. However, wizards and
+wizard objects may be set DARK, and will disappear from the list of the
+room's contents, although they still appear on a @sweep. As a further
+caution, wizards who are set DARK also do not appear on the WHO list of
+connected players. (The rationale for allowing wizards to do this is
+explained in the last section of the manual).
+
+Doing a @sweep several times throughout a private conversation is
+strongly encouraged. Remember that you are not ever guaranteed privacy
+on a MUD.
+
+ 
+2.4	Attributes on Objects: Action Lists
+ 
+The @asucc, @afail, and @adrop attributes are frequently used on
+objects. Any command normally available to the object may be used in an
+action list. Object may also re-program themselves, by enclosing the 
+commands which are to be deferred in curly brackets (braces), { }.
+
+==========================
+[ Example 2.4: Bubbly Pie]
+> @create Bubbly Pie
+Bubbly Pie created as object #1308
+> @adrop pie = @adrop me={:splatters on the floor.;@destroy me};:lands on
+  the floor. If it's dropped again, it'll splatter.
+Set.
+> drop pie
+Bubbly Pie has left.
+Dropped.
+Bubbly Pie lands on the floor. If it's dropped again, it'll splatter.
+> get pie
+Bubbly Pie has left.
+Taken.
+> drop pie
+Bubbly Pie has left.
+Dropped.
+Bubbly Pie splatters on the floor.
+You get your 10 Mark deposit back for Bubbly Pie.
+Bubbly Pie has left.
+==========================
+ 
+ 
+2.5  Machines: @cost, @pay, and @clone
+ 
+Machines use up money as they run. Normally, the cost is 1/64 of a
+Mark per command, plus the normal cost of the command. For example, if a
+machine @creates something, the cost is 10 and 1/64 marks. In general, the
+cost of running a machine is insignificant, but an object which is in an
+infinite loop can quickly become extremely costly. 
+ 
+Many MUSHes have vending machines. These exist to provide some color
+to the world, as well as to net the owner some money. It is generally
+considered impolite to have set the cost of a vending machine to anything
+far above what it costs to run the machine.
+
+The @cost attribute is an integer, which is the amount of money a
+machine must be given before it executes its "pay" programming. The @pay,
+@opay, and @apay attributes are used to program vending machines.
+
+The syntax of the commands is standard: "@<command> <object>=<whatever>"
+and the attributes are triggered by the payment. The MUSH automatically 
+gives change to people who give a machine too much money, and rebukes those
+who are too stingy, so you don't have to make sure that people are giving
+your machine that correct amount of money.
+
+Many vending machines produce objects. This is generally done by
+having a copy of the object inside the machine, and then having the
+machine clone the object. The syntax of that command is @clone <object>.
+The object can be referred to either by name or number. @clone places the
+newly created object in the room (or, in 2.0, if the /inventory switch is
+given, in the object's inventory). The object is identical in all ways, save
+for a different object number.
+
+Clone-type vending machines should be set OPAQUE. This flag, when set
+on something, prevents others from seeing what an object is carrying. Also,
+objects given by a vending machine should be set DESTROY_OK so that people
+can destroy them when they're done with them.
+
+To @destroy an object you do not own, it must be DESTROY_OK and you
+must be carrying it; if you @destroy such an object, you will receive
+the message, "Destroyed.  <Owner>'s <Object>(<#dbref>)". In 2.0,
+the owner will be told, "You get your 10 Mark deposit back for <Object>."
+In 1.50, the owner is given that message, and gets the additional 
+notification, "Destroyed. <ObjectName>(<#dbref>) by <Player>."
+
+If you don't want to see annoying "You get your 10 Mark deposit back
+for <whatever>." messages every time someone destroys one of your
+objects, set the object QUIET.
+ 
+===================================
+[ Example 2.5:  Bubbly Pie Vendor ]
+> @create Hot Pie
+Hot Pie created as object #8301
+> @create Bubbly Pie Vendor
+Bubbly Pie Vendor created as object #8302
+> i
+You are carrying:
+Bubbly Pie Vendor(#8302)
+Hot Pie(#8301)
+You have 158 Marks.
+> @set #8301=destroy_ok
+Set.
+> @succ #8301=You gobble down the hot bubbly pie.
+Set.
+> @asucc #8301=@destroy me
+Set.
+> @cost vendor=11
+Set.
+> @pay vendor=The bubbly pie vendor sets down a hot, steaming pie.
+Set.
+> @apay vendor=@clone #8301
+Set.
+> @tel #8301=#8302
+Hot Pie has left.
+> @set vendor=opaque
+Set.
+> drop vendor
+Bubbly Pie Vendor has left.
+Dropped.
+> give vendor=11
+You paid 11 Marks
+The bubbly pie vendor sets down a hot, steaming pie.
+> get hot pie
+Hot Pie has left.
+You gobble down the hot bubbly pie.
+You get your 10 Mark deposit back for Hot Pie.
+Hot Pie has left.
+===================================
+ 
+
+Database size is frequently an issue on MUSHes. One way of 
+preventing the dreaded "database bloat" syndrome is to avoid using
+@clone whenever possible. MUSH provides for object "inheritance" via
+"parenting".
+
+An object becomes parented via "@parent <child>=<parent>", where
+<child> and <parent> are of any type (and can be of different types).
+A child object inherits all attributes of the parent, unless it
+already has an attribute of that name, in which case the attribute on
+the child "blocks" that of the parent. While no object is allowed to
+have more than one parent, multiple levels of parents are allowed,
+with the "ancestors" passing their traits down to the child.
+
+In 2.0, objects also inherit any exits that their parents might have;
+these show up on the "Obvious Exits" list. In neither version of MUSH
+do objects inherit the locks or flags of the parent. Certain special
+attributes, like @startup, are also not inherited.
+
+Because in almost every regard, the child is identical to the parent,
+cloning becomes almost unnecessary; instead of using @clone, @create
+an object of the same name, set the flags and lock to be identical,
+and then @parent the 'clone' to the original object, so all attributes
+are 'inherited'. There is a convenient shortcut command in 2.0 which
+does all of this: "@clone/parent <parent>".  This saves a large amount
+of database space and also makes it very easy to maintain updates of
+objects that you are making available for public consumption.
+
+It is safe to allow someone to @chown an object after it is @parented;
+the child does not inherit any special kind of control powers over the
+parent. The child can, however, still inherits attributes off the
+parent object, even if the owners of the child and parent are
+different.
+
+
+2.6  Limiting object uses:  @charges and @runout
+ 
+An object may be given charges, limiting its number of uses. Each
+success on the object uses one charge. To set the number of charges on an
+object, use: "@charges <object>=<integer>".
+
+When the charges on an object are exhausted, its @runout action list
+is executed. The syntax is "@runout <object>=<action list>". The
+action list is in the same form as the action lists used in asucc,
+adrop, etc.
+
+Any use of an action-attribute, such as @adrop, @asucc, @afail, @ause,
+or @ahear, will constitute use of a charge. @trigger also uses up a
+charge, although no other MUSH commands do. "@verb" triggered on
+something uses up charges, if an @a-action is specified (see the
+section on @verb later in the manual; basically, this command defines
+@attr/@oattr/@aattr-like triplets).  Note that an object runs out when
+the number of charges is equal to 0. In other words, an object with
+@charges 2 can be used 3 times before it executes the @runout (the
+@runout is executed immediately after the third use of the object).
+ 
+============================
+[ Example 2.6: Mug of Klah ]
+> @create Mug of Klah
+Mug of Klah created as object #135
+> @asucc mug=@pemit %N=You drink some of the klah.
+Set.
+> @charges mug=2
+Set.
+> @runout mug=:is now empty.; @name me=Empty Mug; :shatters.; @destroy me
+Set.
+> drop mug
+Mug of Klah has left.
+Dropped.
+> get mug
+Mug of Klah has left.
+Taken.
+You drink some of the klah.
+> drop mug
+Mug of Klah has left.
+Dropped.
+> get mug
+Mug of Klah has left.
+Taken.
+You drink some of the klah.
+> drop mug
+Mug of Klah has left.
+Dropped.
+> get mug
+Mug of Klah has left.
+Taken.
+You drink some of the klah.
+Mug of Klah is now empty.
+Empty Mug shatters.
+You get your 10 Mark deposit back for Empty Mug.
+Empty Mug has left.
+============================
+ 
+ 
+2.7     Reacting to the Environment: @listen and @ahear
+ 
+These two attributes allow machines to respond to things they hear,
+including speech, poses, @emits, and whispers. The attributes are
+extremely useful for programming machines that sit idle until they
+hear the string "has arrived," or similar things.
+
+The "listen" string usually contains one or more wildcard characters,
+so that a single pattern of words can be listened for out of what may
+be an extremely complex string. For example, an object whose "listen"
+is set to "*smiles *" will match any occurrence of "smiles" followed
+by a space, such as "Elisa smiles happily."
+
+The "ahear" is the action list taken when the object's "listen" string
+is matched. Ahear's general format is similar to asucc, adrop, etc.  There
+are also two refinements of ahear: amhear and aahear. Amhear only responds
+to strings that are generated by the object itself; ahear only responds to
+strings that are not generated by the object itself. Amhear plus ahear
+equals aahear, which allows the object to respond to anything it hears.
+ 
+===================================
+[ Example 2.7: Autogreet ]
+> @listen me=* has arrived.
+Elsa - Set.
+> @ahear me=:waves to %N.
+Elsa - Set.
+[ This forces Elsa to automatically wave to something entering the room. ]
+Abakin has arrived.
+Elsa waves to Abakin.
+===================================
+
+Autogreets are somewhat annoying and are probably best used merely
+as programming examples.
+
+One particularly costly loop is to have an object with a @listen of
+"*" and an @ahear which triggers on some particular pattern of words,
+sitting in a noisy room where the @ahear is evaluated several times a
+minute.  This will cause your money supply to drop rapidly, although
+it is unlikely that you will notice the loop until your money is
+gone. It is noted here in hopes that you will avoid making this
+mistake.
+
+MUSH allows an additional way for objects to listen. Attributes can be
+scanned for ^ listen patterns (in 1.50, this only happens if no
+@listen is set on an object). These pattern triggers are in the format
+"^<pattern>:<action>". They function like a @listen/@ahear
+combination.  Unlike @listen, messages which match the pattern do not
+"go through" to the objects that the object is carrying. In order to
+activate patterns on the object, though, it must be set LISTENER (in
+1.50) or MONITOR (in 2.0).  Also, the object which is the origin of
+the message must be able to pass the use lock of the object with the
+^-pattern.
+
+===================================
+[ Example 2.8: Echo device ]
+> @create Echo
+Created: Object #4570.
+> drop echo
+Dropped.
+> @va echo=^* says, "*":@emit You hear an echo... %1 %1 %1...
+[ The first * matches %0, the second * matches %1. This is the "stack",
+  described in more detail later. ]
+Echo - Set.
+> "Testing.
+You say, "Testing."
+You hear an echo... Testing. Testing. Testing....
+===================================
+
+ 
+2.8      Keeping your objects safe
+
+Unless you enjoy having your stuff stolen, or are planning on giving
+something away, it is usually a good idea to @lock the things you own.
+"@lock <object>=me" will prevent anyone other than yourself from
+picking up an object. Do note that it's usually rude to pick things
+up without permission from the owner.
+
+Locks are useful on more than just objects - they are often used on
+exits. For example, you might want to lock the entrance to your
+bedroom to yourself only. In general, successfully passing a lock -
+going through an exit, picking up an object, etc. - will trigger the
+@succ attributes. Failing to pass a lock will trigger the @fail
+attributes.
+
+The generic syntax is "@lock <object>=<key>". The object and key can
+be name, number, "me" or "here". If the key is a player, you must
+prefix the player name with a * - i.e. "@lock object=*Malachite".  In
+general, if you want something to be locked against everything, lock
+it to #0.
+
+To unlock an object, simply use @unlock <object>.
+
+Boolean expressions are allowed in locks, as are parentheses for
+grouping.  A lock of 'obj1&obj2' means that the thing trying to pass
+the lock must be BOTH obj1 and obj2. A lock of 'obj1|obj2' means that
+the thing trying to pass the lock must be EITHER obj1 or obj2. Make
+sure that you don't confuse these.  There is also a negation operator,
+'!'.  '!obj1' means that the thing trying to pass the lock must NOT be
+obj1.
+
+Carry locks allow you to check if a player is carrying a certain
+object. @lock <object>=+<key> only allows someone carrying <key> to pass the
+lock. Is locks allow passage only if you are the key: @lock <object>==<key>.
+
+The normal @lock <object>=<key> allows passage either if you carry
+the key, or you are the key; thus, a carry lock plus an is lock equals a
+normal lock.
+
+Indirect locks allow you to lock an object to the key of another
+object, thus creating "standard" locks. The syntax is @lock <object>=@<key>
+For example, if the <key> is locked to obj1|obj2, then <object> will also
+be locked to obj1|obj2.
+
+Ownership locks allow you to lock to all objects with the same
+owner. @lock <object>=+<key> only allows someone with the same owner as
+<key> to pass the lock.
+
+* * * * *
+
+         You can lock things to attributes. For example, to make a door which
+only allows females past, @lock door=sex:f*  Wild cards, greater than, and
+less than signs may be used. The latter two refer to alphabetical order:
+@lock door=name:<m  will set the door passable to only those people whose
+names begin with a through l.
+         One special variant of the attribute lock is the evaluation lock.
+It evaluates an attribute, and compares it to a given value; if they are
+the same, then the object passes the lock. The attribute is evaluated as
+a U() function (see the discussion of user-defined functions later in
+this manual for details). The syntax is @lock object=<attribute>/<value>
+The person attempting to pass the lock is passed as the enactor to the
+attribute U-function. Evaluation locks are an advanced programming technique;
+don't worry if you don't understand them.
+
+* * * * *
+
+2.0 provides a wide variety of locks; in additional to the "basic" lock,
+there are enter, leave, use, page, give, receive, telout, tport, and
+link locks. They are set using @lock/<lock name> and @unlock/<lock name>.
+
+An enter lock prevents someone from entering an object unless
+he passes the lock. The object must also be ENTER_OK or owned by the
+person trying to enter it.
+
+Leave, give, and receive locks are obvious: they control who
+is allowed to leave the object, who is allowed to give the object, and
+who is allowed to give things to the object, respectively.
+
+A use lock prevents someone from "use"ing, performing $commands,
+or triggering ^-listen patterns on an object unless they pass the lock.
+This provides another form of security on objects; to prevent someone from 
+abusing the $commands on your personal objects, all you need to do is to
+@lock/use it to "me", so you are the only person who can use the object. 
+Please note that if you uselock yourself, you cannot be given money (since 
+that could potentially trigger the @apay attribute on you).
+
+A page lock prevents someone unless they pass the lock. It does
+not prevents their objects from paging you; to achieve this affect, you
+need to use the ownership lock primitive ($). If you want to prevent someone 
+and all their objects from paging you, use "@lock/page me=!$*playername"  -- 
+i.e., if Ambar wants to prevent Joarm and his objects from paging her, she 
+types "@lock/page me=!$*Joarm". The '!' signifies negation, the '$' signifies 
+ownership, and the '*Joarm' forces the game to parse the name as a player 
+name. Thus the lock reads "not objects owned by player Joarm". In 2.0, this 
+also prevents Joarm and his objects from @pemit'ing to Ambar; in 1.50, the 
+HAVEN flag is required to stop @pemits).
+
+A link lock controls who may link to a LINK_OK location (for
+linking exits or setting drop-tos for rooms) or an ABODE location (for 
+setting the homes of players or things).
+
+* * * * *
+
+Lock types in 1.50 are somewhat more limited. Enter locks and use
+locks are provided. Page locks are a subset of use locks (a use lock
+on a player is the page lock). Teleport locks are a subset of enter
+locks (an enter lock on a room is the teleport lock). They are set
+using the @lock/enter (@unlock/enter) and @lock/use (@unlock/use)
+commands. Except for the fact that they set the Enter/Teleport and
+Use/Page Keys instead of the regular Key field on an object, they
+behave like @lock/@unlock. When you examine a room, you will be shown
+the key "Teleport Key" instead of "Enter Key"; when you examine a
+player, you will be shown the key "Page Key" instead of "Use Key".
+1.50 will, however, recognize the /tport and /page switches, and set
+the appropriate lock for you.
+
+In 1.50, be careful, since a page lock also acts like a use lock, 
+on a player. If you @lock/use yourself to "me", not only will you prevent 
+people from using $commands on you, but you will prevent people from paging 
+you. You should, in general, avoid putting $commands on yourself. You 
+probably also want to leave yourself page-unlocked. A page lock is useful
+if you don't want someone to page you but you don't want to set yourself
+HAVEN (and thereby block out all pages).
+
+			----------
+
+Changing ownership of an object:  occasionally, you may want to give
+a gift to someone, and let them own an object that you have created. The
+@chown command allows you to change ownership of something.
+
+For mortal players, to change ownership of something, the original
+owner must set it CHOWN_OK. The player who is receiving the thing must then
+@chown <thing>=me. If the thing is an object, the receiving player must be
+able to pick it up. If the thing is a room or exit, the receiving player must
+be in the same room. Wizards can simply @chown #<object>=player. 
+
+If you own an object that you want to make sure you don't lose,
+set its home to yourself, using @link <object>=me, and then set the object
+STICKY. Objects set STICKY will automatically go home when dropped; thus,
+when the object is dropped, it will return to you.
+
+			----------
+
+If, somehow, you manage to lose one of your objects, the @find and
+@search commands can be very useful. @find <string> will search the database
+for all objects and rooms that you control whose names contain <string>.
+@find without any arguments displays all objects and rooms controlled by you.
+This command costs (usually) 100 pennies, since it is computationally 
+expensive. The exact cost can be found by "@list costs" (in 2.0) or
+"@config" (in 1.50). The cost for "@find" is the standard cost for all
+computationally expensive commands on a MUSH.
+
+"@find <string>=<first dbref>,<last dbref>" will allow you to limit the
+dbref range searched. This version of the command will check every object
+from <first> to <last>, inclusive. If you do not specify a dbref, <first>
+is assumed to be 0 and <last> is assumed to be the last object in the db
+
+* * * * *
+
+The @search command checks all rooms, objects, and exits owned by
+you. If used without arguments, it prints all of them out. @search can be
+restricted to certain classes - type (rooms, exits, objects, players),
+name (search for a string, like @find), and flags. @search is generally
+faster than @find.
+
+The scope of a @search may be limited in a fashion similar to @find.
+The range must be the _last_ argument to @search. For example:
+"@search flags=p,100,500" would find all objects with the 'p' (PUPPET)
+flag between dbrefs #100 and #500.
+
+Note that @search and @find may be more expensive on certain MUSHes,
+especially those that run on slower machines, or are disk-based. 2.0 MUSH
+code is disk-based; limited @searches (restricted by a flag, for example)
+may not be terribly slow, but a @find might hang the server for several
+minutes (and bring the wrath of the wizards down upon you).
+
+* * * * *
+
+To get a count of how many objects you own, use "@stats". In 2.0,
+"@stats" with no switches returns the total number of objects in the database.
+"@stats/all" returns a breakdown of types in the database. "@stats/me"
+returns a breakdown of what you own. 2.0 @stats breakdowns cost the same
+as @find, so be careful with it.
+
+In 1.50, "@stats" returns a breakdown of types in the database.
+"@stats me" returns a breakdown of what you own. Wizards can use
+"@stats <player>" to get a breakdown of what any player owns.
+
+
+2.9    Do it!  --  falcon
+
+Issue the following commands:
+@create <falcon's name>
+@set <name>=puppet
+@desc <name>=<whatever it looks like>
+@lock <name>=me
+@succ <name>=You call to <name> and <he/she> lands on your arm.
+@osucc <name>=calls to <name> and <he/she> lands on %p arm.
+@fail <name>=You try to pick up <name> but <he/she> bites you!
+@ofail <name>=tries to pick up <name> but <he/she> bites %o!
+@drop <name>=You allow <name> to fly off your arm.
+@odrop <name>=allows <name> to fly off %p arm.
+@listen <name>=<Your name> has left.
+@ahear <name>=@wait 5={:flies after <Your name>; @set me=!puppet;
+   @tel owner(me); leave; @set me=puppet}
+[ This last statement forces the puppet to follow you around. In order for
+  this to work, however, the puppet must be set INHERIT. ]
+[ Obviously, you can have your own variations on these. ]
+
+INDEX OF SECTION I EXAMPLES:
+ 
+1.2   Demonstration of basic commands
+1.3a  Desc
+1.3b  Succ
+1.3c  Fail and Drop
+1.5   Basic character set-up
+2.1   Basic object commands
+2.2   Puppet
+2.4   Bubbly Pie
+2.5   Bubbly Pie Vendor
+2.6   Mug of Klah
+2.7   Autogreet
+2.8   Echo device
+2.9   Falcon

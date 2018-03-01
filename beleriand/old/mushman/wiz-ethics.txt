@@ -1,0 +1,283 @@
+Amberyl's Wizard Lecture
+
+This is an expansion of the section of the MUSH manual called 
+"The Fundamental Laws of Wizarding".   Questions and comments
+should go to lwl@digex.net. The content of the lecture has been
+unmodified since 10/23/94.
+
+
+Administrators on a MUSH have a considerable amount of power. With that
+power comes the responsibility to use it wisely, for the actions of
+an administrator reflect not only on himself, but on the MUSH as a whole.
+Because an admin is in a position of power, he should attempt to set a
+positive example in all dealings, whether in-character or out-of-character,
+Common sense will usually suggest a decent solution to a given problem;
+there are, however, some situations where the ethical and "correct" thing
+to do is not immediately obvious.
+
+
+Players are frequently paranoid about privacy. This is one "right" that
+you should _always_ attempt to respect; thus, this lecture begins with
+a discussion of the DARK flag. When you are DARK in a room, players who
+do a 'look' cannot see you, and you do not appear on the WHO list, but
+a @sweep of the room _does_ show that you are listening and connected.
+Therefore, there is a chance that you will be noticed, and, if you are
+"illegally" in the room DARK, it is almost certain that the players in
+the room will be quite upset.
+
+The reason why players don't like DARK wizards wandering around should
+be obvious -- they're afraid of private conversations being snooped on.
+Therefore, whenever you go _anyplace_ DARK, the first thing you should
+type upon entering the room is a "hello" or similar announcement of your
+presence. Make this a habit! If you do it regularly, even when the players
+in the room know you'll be entering DARK, there's less of a chance you
+will forget at some crucial moment. If you plan to be DARK, and wandering
+around, for an extended period of time, in order to arbitrate an RPG
+conflict or similar event, the players involved should, if possible,
+know of your presence, and if a private conversation begins, it is your
+ethical responsibility to inform the players of your presence immediately,
+_even if_ this lets players know that they are being judged. Your personal
+responsibility to promote privacy overrides any RPG mechanics.
+
+Some MUSH gods may allow their wizards to go DARK in order to observe
+players whom are suspected of trying to harm the game, either by harming
+the database or crashing the server; some other gods may also allow
+wizards to go DARK to observe the actions of a player harassing other
+players. In the latter case, the wizard should indicate his presence to
+the players in the room who are not "under suspicion".
+
+I cannot emphasize enough how important it is to obey the protocols
+for using the DARK flag. This is one of the greatest sources of 
+player distrust in wizards, because it is so _easy_ to abuse. Players
+should be able to have private conversations without doing a @sweep
+all the time. While privacy on a MUD is never, ever, guaranteed, you
+should do your best to contribute towards it.
+
+
+The second of the frequently-abused wizard powers is @teleport. There
+are a number of rules that should be observed when @teleporting. First
+of all, never teleport a player without warning him first. If possible,
+the player should page you with an acknowledgement before you do the
+actual @tel. This prevents, for example, an untimely @teleport wrecking
+someone's set of a @desc on a room. No one enjoys suddenly being yanked
+to another room, and it doesn't hurt you to page the player first.
+
+Never teleport to a room with players without asking the permission of
+the players there first. The exception to this are public hangouts. 
+A room which is merely JUMP_OK is not necessarily a public hangout; use
+some judgement when determining whether or not rooms are public. Unless
+the room is clearly public, ask first; it doesn't hurt you to be polite.
+
+If permission is not likely to be granted, then notify all players in
+the room (@remit works well for this) that you are going to be coming
+in, before entering the room. You should wait a moment between the of
+the announcement and the teleport; this should prevent you from hearing
+something that you shouldn't.
+
+Never make assumptions about whether or not it's okay to teleport into
+a situation. For example, just because a player is paging you for help
+with coding some complex object _doesn't_ mean that he wants you to
+teleport into his room and help him out. I know this from experience --
+as a new wizard, I once struggled to help someone, remotely, with a
+complex MUSHcoded object, and, finally, after fifteen minutes of
+fruitless pages, I finally decided to teleport in and see what errors
+the object was outputting. Unfortunately, I bamf'ed myself straight
+into the middle of a hot 'n steamy tinysex session. Since then, I've
+made it a rule to _always_ ask before teleporting.
+
+
+Don't abuse "examine" or the power to see private information like sites.
+The rules for examining private objects will vary from God to God. On a
+MUSH where a strict theme is enforced, wizards will probably be permitted
+to examine anything in order to check for theme consistency. You should
+never share or show any object, or part of an object, that is not yours
+to another player, without getting the permission of the owner. Also,
+don't steal code. "Stealing code" includes @decompiling/logging/cloning
+without permission, even if you're just using the code for your own
+personal edification or enjoyment. If it's that important to you, ask
+permission.
+
+Sitenames should never be given out. If a player is Unfindable, you
+shouldn't give out his location. Some people MUD to escape people they
+know in Real Life; some players carry vendettas cross-MUD. Other people
+simply prefer not to let others know where they are, VR or RL. You
+should respect this desire.
+
+
+You should generally avoid modifying other people's objects, even if
+you're fixing code problems or typos. The only exception to this is
+publicly owned building owned by a wizard-played builder character
+(the core landscape for the MUSH, the downtown area, etc.)  If you
+encounter an object which is inefficiently programmed or looping,
+and thus slowing down the game for everyone else, simply set it HALT
+and mail the owner; don't fix the problem.
+
+Also, don't @destroy anything of anyone else's unless they explicitly
+ask you to. If it's an item which is illegal in some way, send the
+owner a warning, and give him a certain period of time (a few days,
+usually, depending on how often the player logs in) in which to get
+rid of it. If it's not gone by the end of the period, then you can
+destruct it. If the illegal item is sitting in a public place, you
+should feel free to teleport it back to its owner.
+
+
+Never, ever, @force a player, unless it is _absolutely_ necessary.
+For the same reasons, don't use @trigger and similar commands to make
+a player do something against his will. Also, don't change the attributes
+on a player; for example, it is generally considered unethical to change
+a player's description to something humiliating. Wizards might occassional
+get into practical joke wars, but mortals shouldn't become involved.
+If you need to change an attribute on a player, make sure you copy the
+old attribute to a backup attribute on the player, so that they can
+recover it later, if need be.
+
+
+Wizards can pile huge numbers of things on the queue, and make use of
+computationally expensive commands like @find and @search with impunity.
+If you need to do something that will severely lag the game, do it when
+there aren't many players on. Also, note that very large @dolists cause
+the MUSH process size to grow, and should be avoided whenever possible.
+
+
+Wizards should be uselocked at all times. Private wiztoys should also
+be uselocked. Any item with wizard powers MUST be checked for security;
+if you are not a competent enough MUSH programmer to be able to do this
+yourself, you should show the item to a wizard who is. In addition,
+administrators and objects owned by administrators should never be zoned
+to a Zone to which mortals have access. 
+
+Never give a wiz-power item to a mortal. If a mortal absolutely MUST have
+a wizard-power item to do what he wants, consider @chown'ing that particular
+system to a wizard. If this isn't possible, then make absolutely certain
+that the mortal is trustworthy. Every administrator on the game should be
+aware of all wiz-power items in the hands of mortals.
+
+
+Avoid annoying players with shouts. @wall cannot be blocked, and, therefore,
+you should make sure that everything you shout is informative and necessary.
+On a very small, friendly MUSH, it might be considered acceptable to @wall
+hello and goodbye; on most MUSHes, though, especially RPG ones where "mood"
+and "atmosphere" are important, @walls of that sort should be avoided.
+Shouting to announce a @shutdown in five minutes is acceptable; shouting
+to announce game problems is acceptable. Shouting to announce that you've
+had a bad day and shouldn't be paged should probably be avoided. First of
+all, it makes you sound like a twit; second, it accomplishes nothing useful
+and implies, "stay out of my way or something bad will happen to you."
+If you really want to avoid player pages, go DARK and set a pagelock.
+Players shouldn't be afraid of you on a "professional" wizard level, and
+you should try to avoid actions which cause players to fear you.
+
+
+Wizards should be thoroughly familiar with MUSH. While "psychocoder" status
+is not necessary, a good understanding of MUSH mechanics is necessary. Never
+type a command as a wizard without understanding what it does. You should
+have read the MUSH manual; even if you don't understand all of it, you should
+read and understand the wizard section.
+
+Every object in the Master Room should have a specific purpose. ONLY
+objects used for global commands should be in the Master Room. As few
+total attributes should be on Master Room objects as possible; any
+data objects should be contained on separate objects NOT in the master
+room, and the Master Room objects should NOT be parented to the data
+objects. Every attribute in the Master Room represents another attribute
+that must be checked for $commands when a player types something; thus,
+having unnecessary objects and attributes in the room will slow the
+game down. If you need a place to store objects used as global parents
+and whatnot, use a room _other_ than the Master Room. Master Room code
+should, obviously, be as efficient as possible.
+
+
+There should be at least one wizard on the game who is familiar with the
+technical aspects of the server. Also, backups should be done on a weekly
+basis, or more often, if possible. This will save you a lot of grief should
+your database get eaten by a bug or other problem. If your currently-running
+game begins to show signs of database corruption, it is probably a good idea
+NOT to @shutdown; instead, log into the game account and 'kill -9' the MUSH
+process. It's also a good idea for wizards to know the phone number of the
+God / codehack / site admin, for emergencies.
+
+If you have the necessary technical background, you are highly encourage
+to at least take a glance at the server code. Knowledge of the server
+workings helps your MUSH programming ability, and enables you to make
+intelligent decisions that involve disk, memory, and CPU usage. Also,
+get to know wizards on other MUSHes; this gives you people to go to for
+help should something unfortunate befall your MUSH.
+
+
+Never MUSH while intoxicated or otherwise not fully in control of your
+actions. If you observe another wizard who is MUSHing drunk, @boot them.
+The other wizard will probably be annoyed, but this is better than having
+damage inadvertently caused by someone who isn't thinking clearly.
+
+Know when to log off or back out of a situation. If you feel like you're
+about to explode, get up, walk around for a bit, get a drink of water,
+and come back when you feel like you're ready to cope rationally with
+the situation. If possible, call in another administrator to handle the
+situation. Never, ever, perform wizard actions out of anger; it is likely
+that you will regret them later.
+
+
+A wizard's ability to deal with players is usually the final test of his
+skills. Troublemaking players are quick to find wizards who are easily
+provoked, and frequently enjoy pushing all the buttons they can. When you
+page a player, no matter how annoyed you might be, you should try to
+remain calm and polite. Don't swear at players, or behave in a manner
+that would allow the player to focus a discussion away from his wrongdoing
+to a mistake _you_ made.
+
+Players who are spamming or exhibiting behavior detrimental to the server
+or database should be @booted; if it's a one-time-deal character like
+"You_Suck", a @destroy is also in order. Other players should receive
+warnings before any direct action is taken.
+
+If a player is being obnoxious or breaking MUSH rules, page them and politely
+let them know that their behavior is unacceptable. If the player is not idle,
+and does not respond to your page within a few minutes, repeat your page. If
+the player simply ignores you, or refuses to change his behavior, page with
+a stronger warning, but continue to remain polite. If this doesn't work,
+tell them, "If you don't stop that, I'm going to @boot you."
+
+This will normally at least open a dialogue between yourself and the player
+in question. If the player isn't willing to discuss it, and continues the
+obnoxious behavior, set them GAG. Most players will quit voluntarily. For
+really stubborn players, @boot will work. If they come back and continue to
+be annoying, then @newpassword them. You should NOT @destroy a player who
+isn't a one-shot annoyance. @destroy is not reversible, but a player can
+be re-@newpassworded should he decide to come back and play by the rules.
+
+When talking to a player, you should attempt to remain calm and polite,
+no matter how much the player is trying to provoke you. Ignore personal
+insults, obscenities, and the like, if some useful discussion is occurring.
+If the player is just continuing to be annoying, end the discussion and
+simply tell them, "Do this again and I'll @boot you."  You're not required
+to be a saint or martyr.
+
+Whenever you enter a major conflict with a player, you should log the
+situation, if possible. You should send the other wizards, via email,
+a summary of the situation, and, if necessary, the log. This will prevent
+the player from accusing you of saying or doing things that you did not,
+and will give you a "record" of the player's behavior, in case the player
+claims that he didn't do what you claimed he did. The SUSPECT flag and
+@comment attribute are also good for letting other wizards know about
+suspicious players.
+
+
+These guidelines aren't here to make the task of wizarding more difficult
+for you. They exist to provide some basic guidelines of ethical behavior;
+in general, if you follow these guidelines, players will find it quite
+difficult to accuse you of abusing your wizpowers. They thus work for
+_your_ protection, as well as the players'.  Players frequently take
+wizard mistakes personally and seriously, and may decide, "because
+wizard X did this, all other wizards probably do, too."  Players who are
+paranoid tend to be more difficult to deal with; thus, for the sake of
+your sanity and that of every other wizard who ever has to deal with
+that player, try to avoid giving the a reason to be paranoid.  If you
+consistently have personal problems with a player, you should also avoid
+wizard dealings with that player; have another wizard handle the situation
+instead.
+
+In all things, use common sense, and try to remain calm and impartial.
+When all else fails, log off.
+
+
+[ Based on a lecture first given on TinyKrynn, 2/92, by Amberyl. ]

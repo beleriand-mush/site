@@ -1,0 +1,1461 @@
+MUSH Manual Version 2.008:
+   Copyright 1993, 1994, 1995, Lydia Leong (lwl@netcom.com / Amberyl)
+   Last revised 5/22/95.
+
+Section V: The Art of Psychocoding
+
+13. Basic Concepts
+  13.1  Attribute naming and coding style
+  13.2  String concatenation and the switchless style
+  13.3  What the parser really does
+  13.4  Zones in TinyMUSH 2.2
+14. Tricks of the Trade
+  14.1  Adding to, removing from, and comparing lists
+  14.2  Function building blocks: U() and SWITCH(), DEFAULT(), @function
+  14.3  Formatting strings: SPACE(), REPEAT(), LJUST(), and RJUST()
+  14.4  Lists instead of @dolists: ITER() and FILTER()
+  14.5  Recursion: theory and practice, FOLD()
+15. Efficiency
+  15.1  Parameter passing: U(), ULOCAL(), local registers, SETQ(), and R()
+  15.2  How the queue works
+  15.3  Pipelining
+  15.4  Queue cycles vs. CPU cycles
+
+
+Unlike the rest of this MUSH manual, this section is intended for
+the programmer who already has some experience coding MUSH. Nonetheless,
+newcomers to MUSH might find it helpful to scan through this section, 
+especially the "Basic Concepts". Familiarity with MUSH terminology, 
+major commands, and important functions is assumed.
+
+It is suggested that the reader be on-line while reading this manual,
+with access to the help text for the various functions and the ability
+to test out anything which doesn't seem clear. Some of the functions
+are not explained in gory syntactic detail, since the help text does
+exactly that; the purpose of this manual is to provide information
+that is not found in the help, and, thus, concentrates on style,
+techniques, and quirks that are not immediately obvious.
+
+
+---------------------------------------------------------------------------
+	
+
+13. Basic Concepts
+
+
+13.1	Attribute naming and coding style
+
+A user of MUSH once complained that most MUSH code "looks like
+line noise".  It's quite possible to write totally unreadable MUSH code;
+even with the introduction of the "@@" comment, almost nobody ever comments
+their MUSH code, either via "@@" or via attributes which explain what the 
+object is supposed to do and how it does it. Code that is already difficult
+to fathom is made even more incomprehensible by semi-random naming of 
+attributes and lack of whitespace.
+
+* * * * *
+
+Attributes should be named intelligently and consistently. One
+useful naming convention is to call any attribute which contains a $command
+DO_<name of command>; for example, an attribute with a "scan" command
+might be called DO_SCAN. Any attributes triggered by that command
+would be called SCAN1, SCAN2, etc.  Some people may prefer to place
+the $command in SCAN0; this makes it simple to see everything $scan
+related by doing an "examine object/SCAN*". 
+
+User-defined functions used by the $scan command might be named
+as SCAN_<descriptive name>_FN, such as "SCAN_FLAGS_FN".  Temporary
+registers set by $scan might be called SCAN_<descriptive name>_TEMP.
+The general description of how $scan works could be called SCAN_COMMENT,
+and the "help" for it would logically be named SCAN_HELP.
+
+A recommended naming scheme for constants is to make their names
+based on what the attributes contain; a DBREF suffix indicates a dbref
+number, a NAME suffix indicates a name, and a NUM prefix indicates a
+counter of some sort.
+
+* * * * *
+
+Liberal use of whitespace is also encouraged. Whenever possible,
+leave spaces; a space should be left before the opening brace of an action 
+list associated with a @switch, after the ':' separating a $command from
+its associated action list, after the commas in arguments to functions,
+around the '=' sign between command arguments, and every other place spaces
+can be left without affecting command evaluation.
+
+Practicing a good coding style also helps. Actions associated with
+a @switch should be enclosed in curly braces, as should each group of
+parameters passed to a @trigger. Action lists for @dolist, @wait, and other 
+similar commands should also be enclosed in curly braces. Even if there is 
+only a single action, the braces make it very clear what commands or
+parameters are associated with each other.
+
+* * * * *
+
+Certain small things speed up evaluation. For example, whenever
+possible, use '%0', '%N', and other percent substitutions instead of
+'[v(0)]', '[v(N)]' and similar v-function equivalents. The percent
+evaluations are faster; the only time when the v-function equivalents are
+needed is when explicit string concatenation is required. Similarly,
+the percent-substitution '%b' is much faster than '[space(1)]'.
+
+When possible, use "%#" instead of "%N" or "*%N". This removes
+one layer of name-matching when hunting for the object you are trying 
+to reference, and also guarantees that you will get the enactor, and not
+merely something with the same name as it. Also, in 2.0, and, to a lesser
+extent, in 1.50, objects do not check the name of their container when
+trying to name-match. Furthermore, for objects holding global commands,
+a match on a name %N will fail if the enactor is not nearby. The match 
+for the dbref %#, on the other hand, will always work, no matter where
+the enactor is located.
+
+Avoid excessive use of the [] bracket grouping with functions.
+Unless you are forcing immediate evaluation of an expression for the
+purposes of string concatenation, only one set of brackets is needed 
+around the entire function. If the function is the only argument to a
+command, the brackets are not even needed - "@pemit %#=[v(string)]" is
+the equivalent to "@pemit %#=v(string)". In the interests of readability,
+however, it is advisable to use the bracket delimiters around groups
+of functions within a large, complex function call; this is especially
+true within lengthy SWITCH() or ITER() evaluations.
+
+
+13.2	String concatenation and the switchless style
+
+The increasingly popular "switchless style" of programming eschews
+the actual @switch command in favor of using function evaluations to
+generate a word. The object is then @forced to execute the contents of
+the attribute named by that word. A broader definition of the switchless
+style includes the entire concept of using complex function evaluations to
+replace nested @switches and similar control structures. This cuts down
+on the total number of queue cycles needed to execute a complex program.
+
+The switchless style relies very heavily on string concatenation.
+This can be accomplished by using the square brackets to force immediate
+evaluation of the expression within the brackets. 1.50 also provides the
+STRCAT() function, which explicitly concatenates strings.
+
+* * * * *
+
+For example, suppose we create a "cat" object. We want to define
+a $command, "pet cat", on it, which causes the cat to give the person one
+of several random messages. This is quite simple to code in the standard
+style:
+
+&DO_PET_CAT cat = $pet cat: @switch rand(3)=
+              0, {@emit The cat purrs when %N pets her.},
+              1, {@emit The kitty blinks at %N.},
+              2, {@emit The cat arches her back and hisses at %N.}
+
+The switchless style method would be:
+
+&DO_PET_CAT cat=$pet cat: @emit [s(v(PETMSG[rand(3)]))]
+&PETMSG0 cat=The cat purrs when %N pets her.
+&PETMSG1 cat=The kitty blinks at %N.
+&PETMSSG2 cat=The cat arches her back and hisses at %N.
+
+The brackets around the 'rand(3)' forces that evaluation to be done
+immediately; the result is then concatenated with PETMSG. Thus, if
+rand(3) is 1, we evaluate "[s(v(PETMSG1))]".
+
+This method of picking a message is very useful. If we decide
+we want ten messages instead of three, we merely use @edit on the
+DO_PET_CAT attribute, and change 3 to 10. Then, we can add seven more
+PETMSG attributes.
+
+* * * * *
+
+The switchless style generally works by selecting among attributes.
+Attributes used for switchless programming frequently have names ending
+in a number, since it's generally easier to use MUSH to generate a number
+than a name. Frequently the number will be 0 or 1, since boolean functions
+like AND(), OR(), and NOT() evaluate to 0 or 1.
+
+A broader definition of "switchless" programming is discussed
+later in this manual, in the section concerning SWITCH(). Note that it
+is difficult to program "truly" switchless objects; generally, it is
+neither convenient nor desirable to do so. Instead, the aim of switchless
+programming is to reduce the number of queue cycles needed through 
+indirect selection on a string.
+
+Note that because the switchless style makes heavy use of functions,
+it may use a large amount of CPU time without using many queue cycles. The
+queue cycles-CPU time tradeoff will be discussed later in this manual.
+
+
+13.3	What the parser really does
+
+Many MUSH programmers are curious about exactly what the parser does.
+A large number of programmers who are not familiar with MUSH internals like
+to say, "The parser is consistent."  Throw away that notion. It's wrong.
+The parser is far from consistent. Various commands have their own little
+quirky ways of being parsed. Even certain functions handle their arguments
+differently. To the user, however, it should _appear_ that all things are
+parsed the same way.
+
+Most MUSH commands take one of three forms:
+
+1. <command> <argument>
+2. <command> <argument 1> = <argument 2>
+3. <command> <argument> = <argv 1>, <argv 2>, <argv 3>, ...
+
+In most cases, the MUSH figures out what command you want, and
+then figures out how to parse the rest of the string you typed. Most
+of the time, arguments are run directly through the parser and the
+results handed to the command handler. There are several major exceptions
+to this. The most notable of these are @switch and @dolist. In @switch,
+he first argument (the variable to switch on) is evaluated; the comma-
+separated arguments are not. @switch evaluates these arguments as needed.
+For the @dolist command, the first argument (the list to use) is evaluated
+immediately. Then, a find-and-replace is done on the second argument,
+sequentially replacing the "##" token with elements of the list. The final
+result of such substitutions is then passed to the evaluator.
+
+* * * * *
+
+The MUSH parser evaluates expressions recursively. The main
+server routine to do this is called 'exec'; from this point on, the 
+expression "the string is exec'ed" will be used to refer to the
+evaluation of the string by the parser.
+
+Most uses of square brackets force another call to exec.
+Also, every argument to a function is passed through exec, as are the
+arguments of most commands. 
+
+Let's take a look at our cat example above. If we type "pet cat",
+the object attempts to execute "@emit [s(v(PETMSG[rand(3)]))]".
+The server goes through the following:
+
+1. It looks up "@emit" in the command table. The server discovers that 
+   this command takes one argument, which is evaluated. It thus
+   passes "[s(v(PETMSG[rand(3)]))]" to exec.
+2. exec attempts to evaluate that string. It sees the brackets, and
+   invokes exec a second time, with the brackets stripped, so we
+   are now evaluating "s(v(PETMSG[rand(3)]))"
+3. s() is a function, so exec is called yet another time to evaluate
+   the argument to s(). We now need to evaluate "v(PETMSG[rand(3)])"
+4. v() is also a function, so we call exec on its argument. We are
+   thus left with "PETMSG[rand(3)]"
+5. exec scans that string until it sees the pair of brackets. It then
+   invokes yet another exec call to evaluate the contents of the
+   brackets. We now evaluate "rand(3)".
+6. Because rand() is a function, we once more invoke exec, on "3".
+7. "3" is just a string literal, so exec returns "3".
+8. Having figured out the arguments to rand(), we evaluate it.
+   Let's say "rand(3)" is equal to "0".
+9. This expression is then concatenated with "PETMSG", giving us
+   the string "PETMSG0". This is our argument to v(). Now that we
+   have our argument, we evaluate "v(PETMSG0)", giving us,
+   "The cat purrs when %N pets her."
+10. We now pass this to s(). "s(The cat purrs when %N pets her.)"
+    evaluates to "The cat purrs when Amberyl pets her."  (assuming
+    Amberyl is the enactor). Note that because we used '%N' rather
+    than '[v(N)]', no additional execs are required to get the
+    name of the enactor. (If we used '[v(N)]', two additional exec
+    calls would be required: one to strip the brackets, and one to 
+    evaluate the argument to V(). Thus, you can see that it's quite 
+    a bit more efficient to use '%N'.)
+11. This string is passed to the command handler for @emit, which
+    shows it to the appropriate people.
+
+Notice how many evaluations such a simple string can need!
+When coding, it is important to think not just about how many 
+queue cycles something uses; most functions must evaluate all their
+arguments, and the computation time taken to do this eventually
+adds up. Although this is usually on the order of milliseconds,
+the actual cumulative delay, on a MUSH running on a busy machine,
+can add up to a significant amount of time.
+
+* * * * *
+
+One important effect of functions evaluating their arguments first
+before executing the function is that attempts to turn space-separated
+lists into comma-separated lists for functions frequently fail. For
+example, MAX(v(LIST), 25), where LIST is "1, 10, 83, 4"  causes the
+game to find the MAX of "1, 10, 83, 4" (which the string-to-integer
+conversion functions trims simply to "1") and "25", thus causing the
+function to return "25", rather than "83", which is what one might
+have expected it to return. 
+
+Similarly, using a LIST of "1 10 83 4" and then evaluating an
+expression such as "MAX([iter(v(LIST),{##,})] 25)" doesn't work.  The
+ITER() generates the list "1, 10, 83, 4," but this is NOT equivalent
+to "MAX(1, 10, 83, 4, 25)"; the erroneous use of ITER() instead causes
+MAX() to look for the maximum of "1, 10, 83, 4," (which turns into "1")
+and "25". There are several ways of getting around this; see the
+discussions on ITER() and FOLD() for examples.
+
+* * * * *
+
+Two important functions do not immediately evaluate their arguments.
+ITER() and SWITCH() only evaluate their arguments when the arguments
+are needed. ITER() does a brute force find-and-replace for "##" on its
+second argument, much like @dolist does; to avoid needing odd
+combinations of escapes in the second argument, none of the arguments
+are evaluated until the ITER() function actually uses them. Because
+SWITCH() calls can be massive, only those arguments which must be
+evaluated will be evaluated. This is important to keep in mind if you
+are using functions with side-effects, such as 1.50's create().
+
+Note that if you are making multiple identical calls to functions,
+all the calls are evaluated _separately_; the MUSH does _not_ know that
+it has evaluated that expression before. This is definitely something to
+remember, if you use functions like U() to evaluate huge complex expressions.
+By the same logic, "@pemit me=add(rand(3),rand(3))" does NOT return the same
+value for those two rand() calls. Ways of avoiding multiple identical
+function calls will be discussed later in this manual.
+
+Finally, note that the UNIX random-number generator is very poor, and
+for small values of N, often returns the same value several times in a
+row, even if the overall distribution over, for example, 1000 trials,
+is evenly apportioned. If, for some reason, it is important that your
+numbers be "more random", you may want to try a method such as using
+a very large value of N, and then using a MOD() call to bring it into
+the appropriate range. For example, to generate a number from 0 to 9,
+one can use "rand(10)"; however, one will get a better random distribution
+via "mod(rand(1000),10)".
+
+
+13.4    Zones in TinyMUSH 2.2
+
+Zones in TinyMUSH 2.2 are somewhat different from PennMUSH 1.50 Zones,
+and therefore deserve a separate explanation. This section only applies
+if Zones are permitted by the MUSH's configuration.
+
+If you are standing in a room, type a command which is not matched by
+an exit, or locally, or internally, and the parent of your current
+room is set ZONE, all objects inside that parent will be checked for
+$commands, just as if that parent object were the Global Master Room.
+
+If there are no command matches, then if the parent of that parent is
+also ZONE, objects in it will be checked. This goes on until something
+is matched, or the parent is no longer set ZONE.
+
+If there are still no matches, the same process is repeated, starting
+from your own parent object, if it's ZONE.
+
+If still nothing is matched, command checking proceeds to the Global
+Master room.
+
+* * * * *
+
+Essentially, what this means is that the ZONE chain creates a chain of
+Local Master Rooms. They provides a great deal of power and
+flexibility that normal parent rooms don't provide; they confer all
+the benefits of normal parenting, in addition to this specialized form
+of command-checking.
+
+Commands matched via zone checks are executed by the objects which
+contain the commands, NOT by the room or player itself. Therefore,
+this method is extremely useful for permitting players other than
+the Builder Character (or generic area owner) to execute commands for
+a given area. It also alleviates the necessity of setting all rooms
+in the area INHERIT, if a certain local command requires INHERIT.
+
+Because the ZONE chain is essentially a chain of Master Rooms, the
+same caveats which apply to Master Room programming apply to objects
+in these chains. Objects in the rooms should have a minimal number of
+attributes on them. Because the parents of objects in the rooms are not
+checked for $commands, @parent'ing such objects to a data object will
+reduce the checks needed without significantly altering the programming
+style for such an object.
+
+Security, of course, is important -- ZONE chains should be isolated,
+and unauthorized players should be prevented from gaining access to 
+them.
+
+
+---------------------------------------------------------------------------
+
+
+14.	Tricks of the Trade
+
+
+14.1    Adding to, removing from, and comparing lists
+
+Lists are the heart and soul of MUSH. Earlier in this manual,
+ways of finding certain items within a list, adding to lists, and removing
+from lists were discussed.
+
+The standard list-operation functions fare poorly when there are
+items in the list which are identical. In particular, we often want to
+avoid adding items to a list which are already in it, get the result of
+merging two lists, and remove items from a list without destroying the
+spacing of the list.
+
+The REMOVE() function generally leaves an extra space in the list.  We
+can get around this problem by passing the results of a REMOVE() call
+to S(); indeed, this method of forcing another round of pronoun
+substitution is useful for compressing undesired spaces. The SQUISH()
+function removes extra spaces, and is useful when a second round of
+evaluation is not desirable. Thus, REMOVE() is adequate for most of
+the times we wish to remove an item from a list.
+
+* * * * *
+
+The SETDIFF() function provides a better way to remove items from
+a list. SETDIFF(<list 1>,<list 2>) removes from <list 1> all items that are
+in <list 2>. It can also be thought of as returning all the elements of
+<list 1> that aren't in <list 2>. This is useful when you want to guarantee
+that you have removed every occurrence of an item; objects like communicator
+systems are best programmed like this. 
+
+The SETUNION() function is useful for adding an element (or elements)
+to a list. It merges two lists, removing duplicates. Like SETDIFF(), this 
+function is useful when you want to guarantee that you have no duplicates;
+in a communicator system, this is especially important.
+
+The SETINTER() function returns the elements that are in both lists.
+This is also for use in merging lists; elements that are only in one list
+get eliminated. This is also useful for telling if all elements of one
+list are in another; evaluate the SETINTER() of the two lists, and COMP()
+it to the list you are interested in.
+
+* * * * *
+
+One interesting example problem in list manipulation is the removal of
+a specific element by its position. This is a problem encountered when
+it is not possible to use REMOVE(), which removes the first instance of
+an elements by name, or SETDIFF(), which removes all occurrences of the
+elements, also by name. For example, if we keep two attributes on an 
+object, one with the names of dragons, and the other with the colors of
+those dragons, and we want to remove one of the dragons from both lists,
+we encounter this problem; while names in the first list should be unique,
+many of the words in the second list will not be (we will probably have
+many Blue dragons, for example.)
+
+If our list of dragon names is in the attribute NAMES and the
+corresponding colors list is in the attribute COLORS, we can delete,
+given a dragon name, its corresponding color from the colors list by
+using EXTRACT() to return all words before that position, and all
+words after that position. We determine the position using the MEMBER
+function, as per the standard list-matching routine described earlier
+in this manual. The code is thus:
+
+&COLORS object=[extract(v(colors), 1, sub(member(v(names),%0),1))]
+        [extract(v(colors), add(member(v(names),%0),1), words(v(colors)))]
+
+Once we've deleted the color from the colors list, we can safely use REMOVE()
+or SETDIFF() to remove the dragon name from the names list.
+
+* * * * *
+
+The above problem can be more easily solved by the judicious application
+of a built-in function callled LDELETE(), which deletes an element from
+from a list, given the element position to delete.
+
+LDELETE() has two brethren functions, called INSERT() and REPLACE(),
+which take the arguments <list>, <pos>, <word>. The first function 
+inserts <word> into <pos> of <list>, and the second function replaces
+<pos> element of <list> with <word>.
+
+All three of these functions should be used instead of clumsy EXTRACT()
+manipulations of the type described above.
+
+
+14.2	Function building blocks
+
+Two functions form the core of switchless programming: U()
+and SWITCH(). The first (also known as UFUN() in 1.50) allows the
+MUSH programmer to define, in a limited sense, his own functions,
+while the latter pattern-matches a string against a list of other
+strings, and, instead of triggering an action, as does @switch
+command, the SWITCH() function simply returns a string.
+
+U() takes up to ten arguments. The first argument is an
+attribute, which specifies where to look for the function definition.
+This argument can be a name, or it can be an object/attribute pair.
+The remaining arguments to U() are parameters to be passed on the
+stack (i.e. as %0 - %9). Thus, stack parameters to a U() evaluation
+are purely local - they are not at all related to the value of the
+"global" stack. A evaluation like "u(FOO_FN, bunch, of, words)" would
+pass "bunch" as %0, "of" as %1, and "words" as %2. Then, the contents
+of FOO_FN would be evaluated with those values. For example:
+
+> &TEST me=%0 has [strlen(%0)] characters and [words(%0)] words. %1!
+> "[u(TEST, Test string, Neat)]
+You say, "Test string has 11 characters and 2 words. Neat!"
+
+In this example, %0 is "Test string", and %1 is "Neat". Note that
+those values are only true within TEST, though. For example, values
+passed by @trigger are unchanged:
+
+> &TEST me=%0 has [words(%0)] words.
+> &ACT me=say %0 %1 %2 - [u(TEST,%1)] - %0
+> @trigger me/act={a 1}, {b 2 3}, {c 4 5 6}
+You say, "a 1 b 2 3 c 4 5 6 - b 2 3 has 3 words - a 1
+
+From the @trigger, %0 is "a 1", %1 is "b 2 3", and %2 is "c 4 5 6".
+In the TEST evaluation, %0 is "b 2 3", since that was the parameter
+passed to it. But when we return to evaluating the output of the 
+@trigger, %0 is still "a 1"; the value of %0 in the U() evaluation
+of TEST does not change the real value of %0.
+
+* * * * *
+
+1.50 and 2.0 handle U() evaluation differently; 1.50's GET_EVAL() is
+basically identical to its U(). For the differences between 2.0's
+GET_EVAL() and U(), see the earlier section of the manual on GET().
+
+The only other difference between 1.50 and 2.0's U() is that
+1.50 does not force immediate evaluation of a U() unless it is surrounded
+by square brackets. In other words, in 1.50, "&FOO_FN object=strlen(%0)"
+and "&FOO_FN object=[strlen(%0)]" are handled differently - without the
+brackets, the game does a local evaluation and substitution, and pastes
+that in, instead of forcing an immediate evaluation. For example:
+
+> &TEST1 me=strlen(%0)
+> &TEST2 me=[strlen(%0)]
+> "Test1: -[u(TEST1,foo)]- Test2: -[u(TEST2,foo)]
+You say, "Test1 -strlen(foo)- Test2: -3-"
+
+The programmer is allowed slightly more flexibility when immediate
+evaluation is not forced. In general, it is good programming practice
+to put square brackets around the functions contained in an attribute
+called by U().
+
+* * * * *
+
+The U() function is usually used to clean up code which would
+otherwise be horrendously complicated and unclear. Also, because the
+parameters passed to U() are only evaluated once, if you need to evaluate
+an expression which utilizes a complex expression several times, you
+can simply make that complex expression a parameter to U(). This method
+of using U() is detailed later in the manual, in the section dealing
+with efficiency.
+
+A general rule of thumb of putting an expression in a U() is,
+"If you use it more than once, and it contains more than two or three
+nested functions, or it is more than 70 characters (one line) long,
+make it a U()."   The 70-character rule has its exceptions, but
+anything you can't type without using emacs or some other kind of
+parentheses/brackets-matcher is Too Long and should go into a U()
+attribute by itself.
+
+* * * * *
+
+U() is often used for permission checks on objects. For example,
+a bulletin board might only permit the original poster of a message to
+delete it. In the future, however, you might wish to allow wizards to
+also delete messages. Rather than having to scan through all the bulletin
+board code, it'd be simpler just to change a single U() function. Thus,
+when writing the board code, it'd be good to call something like
+OK_TO_DELETE_FN, even if the check for permission to delete is simple.
+As long as you keep the parameter list the same, you shouldn't have any
+trouble swapping in a new OK_TO_DELETE_FN should you ever change your
+mind about who is allowed to delete messages.
+
+* * * * *
+
+"Switchless programming" is a bit of a misnomer; this style
+frequently involves the SWITCH() function, although it generally 
+avoids the @switch command. The SWITCH() function is quite similar
+in format to @switch, but instead of performing a command list based
+on matching a string pattern, it returns another string. It is as
+flexible of a pattern-matcher as @switch, taking the '*' and '?'
+wildcard characters. The obvious use for this function is turning
+one string into another string; if there is more than one match
+possible, SWITCH() returns the first one. SWITCH() does not evaluate
+its arguments until it needs to; therefore, if you have side-effect
+functions within a SWITCH(), such as 1.50's CREATE(), remember that
+they will not get evaluated unless the corresponding pattern is
+matched.
+
+When combined with U(), SWITCH() is an extremely powerful
+tool. One common application of this combination is to return boolean
+values (0 or 1) based on some string. The most frequently used
+example of this is HASATTRIB - the determination of whether or not
+an attribute exists on a certain object. If the attribute exists,
+it evaluates to 1; if not, it evaluates to 0. The code for this is
+simple:  &HASATTRIB_FN object=[switch(get(%0/%1),,0,1)]
+It is then called via [u(HASATTRIB,object,attribute)]. If the
+GET() returns nothing, then there's no such attribute, and the
+evaluation is 0. Otherwise, it's 1.
+
+Boolean returns can be extraordinarily useful in conjunction with
+SETQ() and R(). For example, if you want to print out a '+' for
+every time a function returns 1, and a '-' when the function returns
+0, you can do a '[setq(0,-)][setq(1,+)]' and then print out
+'[r(u(COMPLEX_FUNCTION))]' instead of continually SWITCH()ing
+for the string to print.
+
+* * * * *
+
+Note that one common use of SWITCH() -- returning a value if a 
+certain attribute does not exist -- is made unnecessary by the
+addition of the functions DEFAULT(), EDEFAULT(), and UDEFAULT(),
+in TinyMUSH 2.2. These functions take the basic syntax:
+function([<object>/]<attribute>, <default>[,<parameters for U()>])
+
+Instead of writing the following:
+
+[switch(v(TEST),,No test string.,v(TEST))]
+[switch(get(#10/TEST),,No test string.,get_eval(#10/TEST))]
+[switch(v(TEST),,No test string.,u(TEST,%#))]
+
+one could write, respectively:
+
+[default(TEST,No test string.)]
+[edefault(#10/TEST,No test string.)]
+[udefault(TEST,No test string.,%#)]
+
+This elimination of the extra attribute retrieval is valuable, and
+the lack of a SWITCH() removes the need to do any sort of wildcard
+pattern match. 
+
+			----------
+
+SWITCH() can be used to entirely eliminate a @switch. For
+example, here's a typical lengthy @switch construction:
+
+@switch v(num)=0,@emit [v(apple)],1,@emit [v(apple)],2,@emit [v(apple)],
+	3,@emit [v(apple)],4,@emit [v(apple)],5,@emit [v(pear)],6,
+	@emit [v(orange)],7,@emit [v(orange)],@emit [v(cherry)]
+
+This can be reduced to:
+
+@emit [v([switch([and(gte(v(num),0),lte(v(num),4))],1,apple,
+	[switch(v(num),5,pear,6,orange,7,orange,cherry)])])]
+
+This has the advantage of reducing the extra queue cycle involved in
+the @switch. It isn't quite as easy to read as the @switch statement,
+initially, but with practice, switchless-style coding becomes just as
+simple to follow. (Note that extra brackets have been added in the
+example above in order to make it easier to read.)
+
+The repeated calls of 'v(num)' are inefficient. A better method follows
+below; this time, the extra brackets have been left out.
+
+@emit [setq(0,v(num))][v(switch(and(gte(%q0,0),lte(%q0,4)),1,apple,
+	switch(%q0,5,pear,6,orange,7,orange,cherry)))]
+
+This can be even further compressed by a technique which will be described
+in another section; it combines several switch patterns into one.
+
+@emit [setq(0,v(num))][v(switch([and(gte(%q0,0),lte(%q0,4))]:%q0,1:*,apple,
+	*:5,pear,*:6,orange,*:7,orange,cherry))]
+
+* * * * *
+
+There are also variations on this theme, which don't necessarily
+eliminate the @switch. For example, if instead of the simple @emit example
+above, there were different action lists associated with each value of
+the NUM attribute, it would be impossible to eliminate the @switch
+efficiently. It would be possible to generate, as a string, the action
+list to be run, and then @force the object to do it, but that wouldn't
+be any timed gained. Here is a more complex example of a @switch for
+which this is true:
+
+@switch v(num)=0, {@pemit %#=Success.}, 1, {@pemit %#=Success.},
+	2, {@pemit %#=Success.}, 3, {@emit Disaster!}, 4, {@emit Disaster!},
+	5, {@tel %#=#100; &victim me=[v(victim)] %#}, {@pemit %#=Failure.}
+
+The best approach to something like this is to generate a "code string"
+via the SWITCH() function, and then @switch on that code. Usually, this
+looks best if done in combination with a U(), but for this example, we'll
+simply write it out; just realize that the left hand side of the '=' sign
+would probably be best put in a U().
+
+@switch switch([and(gte(v(num),0),lte(v(num),2))],1,OKAY,
+		[switch(v(num),3,BAD,4,BAD,5,OTHER)]) =
+	OKAY, {@pemit %#=Success.}, 
+	BAD, {@emit Disaster!},
+	OTHER, {@tel %#=#100; &victim me=[v(victim)] %#},
+	{@pemit %#=Failure.}
+
+In this particular case, the switchless code is not an improvement
+over the original @switch. However, if we ever want to change what constitues
+"okay", "bad", "other", or failure, all we have to change is the expression
+on the left hand side of the '='; we don't have to rewrite the entire 
+command. If it's put in an attribute as a U() instead, this becomes
+even easier; we simply need to change that attribute.
+
+* * * * *
+
+Here is a variant of the "code string" procedure which does not
+use SWITCH(). Instead, it generates several words based on the values
+we are interested in switching on, and takes advantage of wildcards.
+In this case, the first number generated tests for 0 <= num <= 2,
+the second number for num = 3 or num = 4, and for convenience, the value 
+of num itself as the third word.
+
+@switch [and(gte(v(num),0),lte(v(num),2))] [or(eq(v(num),3),eq(v(num),4))]
+		[v(num)]=
+	1 * *, {@pemit %#=Success.},
+	0 1 *, {@emit Disaster!},
+	0 0 5, {@tel %#=#100; &victim me=[v(victim)] %#},
+	{@pemit %#=Failure.}
+
+When using this kind of switch, it is usually safer to use "@switch/first"
+(also called "@select") to ensure that we only match the first case that
+applies.
+
+The multiple-code-words method is most efficient when used to
+eliminate multiple @switch statements. For example, consider the case
+of checking valid input for a command which takes the format
+"test <four letter word> <player name>". We want to display an
+appropriate error message. The simplest way to code this up is:
+
+$test * *: @switch [eq(strlen(%0),4)]=0, {@pemit %#=Invalid word.},
+	{@switch [num(*%1)]=#-1, {@pemit %#=Invalid player.},
+	{@trigger *%1/TEST_ATTRIB}}
+
+This costs us extra queue cycles, though, and also doesn't catch the
+case of both arguments being incorrect. Using code words, we can fix that:
+
+$test * *: @switch/first [eq(strlen(%0),4)] [num(*%1)]=
+	0 #-1, {@pemit %#=Invalid word and player.},
+	0 *, {@pemit %#=Invalid word.},
+	* #-1, {@pemit %#=Invalid player.},
+	{@trigger *%1/TEST_ATTRIB}
+
+Note that because we use patterns which are not mutually exclusive
+("0 #-1" also matches "0 *" and "* #-1"), we must use @switch/first.
+
+* * * * *
+
+Other interesting tricks can be done with @trigger and SWITCH().  For
+example, in cases where we want to pass a number of complex function
+evaluations to a later evaluation, we might want to use a @trigger
+instead; if we eliminate the @switch in the process, this turns out to
+be the same number of queue cycles, and syntatically neater.
+
+Take the following example, based on the notes above. This time,
+however, instead of sending the message to %#, we want to send the
+message to something defined by the complex black-box user-defined
+function called with u(BIG_FN,%#,revwords(%0)) -- too much to type
+repeatedly. Thus, we end up with something like:
+
+$test *: @trigger me/[u(FOOBLE_FN,%0)]_TRIG=u(BIG_FN,%#,revwords(%0))
+
+We use FOOBLE_FN (whatever that happens to be) to generate the name
+of the attribute to trigger, and now we end up writing that parameter
+out only once. This technique is particularly useful in extremely
+large switch statements which have many cases and long action lists.
+
+			----------
+
+The major reason to write code using U() and SWITCH() isn't
+speed, for large projects. It's modularity. If you define some kind
+of U() to check permissions to run a command, for example, if you ever
+want to change the criteria, all you need to do is to change the
+definition of that U(). SWITCH() is also particularly good at reducing
+complex expressions that might otherwise require several @switches
+by means of the "code strings" method; it's easy to jam multiple
+@switch clauses into a single @switch by providing a complicated
+SWITCH() to generate a word that can be @switch-cased on. One
+should, however, be wary of trying to reduce all code down to the
+minimum number of queue cycles; some amount of readability is also
+important, as is the amount of "real CPU time" needed to execute
+a given MUSH program. This trade-off is discussed in detail later
+in this manual.
+
+There are certain functions whose functionality is frequently needed,
+but simple enough to code in MUSH that they are not worth hardcoding
+into the server. To provide some kind of standardization for these
+functions, and to get around the occasionally clumsy U() calling
+convention, MUSH provides a mechanism called "@function". It enables
+the global definition of a U() as an imitation "real" function. A
+Wizard (or, in 1.50, someone with the Functions power) can specify a
+name for the function and the place where it can be found, and then
+anybody on the MUSH can use it as if it were a built-in function.  The
+syntax is: @function <function name>=<object>,<attribute> <function
+name> is the name used for the function, and <object> and <attribute>
+specify the name of the attribute and the object on which it can be
+found. The parameters passed to an invocation of a function defined in
+this way are passed as %0 - %9. Therefore, any function normally
+called via U() can be defined globally simply by adding it to the
+"local global" function table via @function. For example, in 1.50:
+
+> &HASATTRIB_FN #10=[switch(get(%0/%1),,0,1)]
+> @function hasattrib=#10,hasattrib_fn
+
+tells the game to add HASATTRIB to the functions table, and to use
+the attribute HASATTRIB_FN on object #10 when evaluating that. Then
+one could simply do:
+
+> @desc me=The writer of the MUSH manual.
+> say [hasattrib(me,desc)]
+You say, "1"
+
+This would be equivalent to "say [u(#10/HASATTRIB_FN,me,desc)]", but is 
+syntactically much neater, as well as faster. Also, because of the @function,
+any player on the MUSH can use HASATTRIB(), even if he can't directly read
+the attribute. Thus, players do not have to see the code in order to use
+it. If the function were a simple U(), another player would have to be
+able to read the attribute - it would either have to be public, set public
+via the VISUAL attribute flag, or visible because the object it was on (#10)
+was set VISUAL.
+
+Note that the syntax in 2.2 is "@function <function>=<object>/<attribute>".
+2.2 also takes the switch "/privileged"; if this is given, the function
+is evaluated as if it was performed by the object on which it was stored
+(giving players access to information which, for example, might only be
+accessible to Wizards under normal circumstances). Otherwise, the function
+is evaluated as if it were stored on the invoker.  (Also note that the
+above example is somewhat irrelevant in 2.2 -- the HASATTR() function
+performs that functionality.)
+
+
+14.3	Formatting Strings
+
+A lot of "MUSHtoys" involve the "pretty-printing" of output;
+frequently, this means listing output in neat columns. To do this,
+one must calculate the number of spaces needed to get to the place where
+the next "real" string should start. This can be accomplished in one
+of two ways.
+
+The most efficient way to do this is to use the RJUST() and LJUST()
+functions, which right- and left-justify a string, respectively.  The
+first argument to these functions is the string to print, and the
+second argument specifies the field width. Strings that are too long
+do not get truncated. Both of these functions take an optional third
+argument, which specifies the fill character to use; if no third
+argument is given, a space is used. Thus, if you want to %0 to start
+at column 1, %1 to start at column 20, and %2 to start at column 45,
+the expression "[ljust(%0,19)][ljust(%1,24)]%2" will work.
+
+* * * * *
+
+In old versions of 2.0, a slightly clumsier method must be used. The SPACE()
+function is used to print spaces; you must calculate the number of spaces
+to print based on the length of the string you are printing. For the
+case above, the equivalent expression, using the SPACE() function, is
+"%0[space(sub(19,strlen(%0)))]%1[space(sub(24,strlen(%1)))]%2"
+The major problem with printing something in this way concerns recalculation
+of the same string. If, for example, you had, instead of %0, %1, and %2,
+three large, complex functions, you would have to evaluate those functions
+twice, once to actually print it, and once to calculate the length of
+the string. For extremely complicated functions, the doubling of this
+work may cause a significant loss of speed when the object is used. This
+can be avoided by defining RJUST and LJUST as U() functions:
+
+&LJUST_FN object=%0[space(sub(%1,strlen(%0)))]
+&RJUST_FN object=[space(sub(%1,strlen(%0)))]%0
+
+The extra overhead of invoking another U() function generally is less
+than that of computing a large function evaluation.
+
+Related to the SPACE() function is the REPEAT() function,
+which repeats an arbitrary string a given number of times. The
+strings are concatenated with each other, without spaces separating
+each repetition. It can be used to fake the three-argument version of
+LJUST() and RJUST():
+
+&LJUST3_FN object=%0[repeat(%2,sub(%1,strlen(%0)))]
+&RJUST3_FN object=[repeat(%2,sub(%1,strlen(%0)))]%0
+
+Generally, though, this function is used for generating long lines of
+asterisks, dashes, and other symbols used for ASCII graphics or division
+of output into fields.
+
+* * * * *
+
+One common formatting task is the formatting of poses, says, and the like,
+for arbitrary commands. Suppose, for example, that you have a chat system,
+which takes a command of the format, "$chat *". You want the following:
+
+chat Hi!          ==>  Fire says "Hi!"
+chat :waves.      ==>  Fire waves.
+chat ;'s idling.  ==>  Fire's idling.
+
+Assuming that the * is going to end up as %0, and the chatting person's
+going to be the enactor, the following works:
+
+[switch(%0,:*,%N [delete(%0,0,1)],;*,%N[delete(%0,0,1)],%N says "%0")]
+
+Note that we use DELETE() here to remove the first character of the
+string, if necessary, instead of using MID() to get everything after
+the first character; deleting one character is a lot faster.
+
+
+14.4	Lists instead of @dolists
+
+The most powerful list-creation facility available in MUSH is
+the ITER() function. ITER() takes two arguments, a space-separated list
+of words, and a format string of some sort (which can contain other
+functions). The format string is evaluated for each element of the list,
+with the "##" token being replaced by the list element. The result is
+also a list, with each element separated by a space. The simplest
+example of an ITER() is something of the form "[iter(%0,##)]", which
+just returns back %0. The most common use of ITER(), however, is turning
+a list of dbrefs into a list of names: "[iter(lcon(here),name(##))]"
+returns a list of names of the objects in a room. 
+
+The mundane uses of ITER() are fairly obvious; it's used to
+transform one list into another list. A more sophisticated use of
+ITER() is using the function to replace a @dolist-@pemit combination
+with a single @pemit and ITER(). This is useful for bulletin board
+objects, mailer objects, WHO list formatters, and other mass-output
+devices. Because ITER() places a space between each element of the
+list returned, to correctly format such a list so that the elements
+are returned one per line, a "%r" should be placed at the beginning
+of the format string. For example, to return the list of contents
+in a room, by name, one to a line, use "[iter(lcon(here),%r[name(##)])]"
+The "%r" must come first, not last; otherwise, the output would be
+indented by one space.
+
+Using @dolist: @pemit %#=You see:; @dolist lcon(here)={@pemit %#=name(##)}
+Using ITER():  @pemit %#=You see:[iter(lcon(here),%r[name(##)])]
+
+* * * * *
+
+One is frequently interested in obtaining only those members
+of a list for which a certain expression is true. For example, the
+construction "[iter(v(list),switch(u(FILTER_FN,##),1,##,))]" is quite
+common. It means "return all those elements of the list contained in
+the attribute LIST, for which FILTER_FN evaluates to 1."
+Because this construction is very frequently used, 1.50 provides a
+more efficient short form, via the FILTER() function. The first
+argument to FILTER() is an attribute or object/attribute pair (just
+like U()'s first argument), and the second argument is a list. FILTER()
+returns all elements of the list for which the first argument evalutes
+to 1. Thus, the equivalent to the expression above would be simply
+"[filter(FILTER_FN,v(list))]".
+
+* * * * *
+
+ITER() can also be used to solve the MAX() problem from earlier
+in this manual -- taking a space-separated list and passing it to a
+function as a comma-separated list. The MUSH parser, when it sees a
+function evaluation, attempts to evaluate each argument to the function,
+using the comma to separate each argument. The problem encountered with
+turning the space-separated list to the comma-separated list was that
+the comma-separated list was generated _after_ the parser had already
+determined where the argument began and ended. Thus, we must delay the
+evaluation.
+
+We do this by causing the escaping the function, without escaping
+its arguments, so that the arguments are evaluated (using ITER() to turn
+the space-separated list into a comma-separated list), and then running
+the entire thing through the S() function, which causes a second parser
+pass. Presuming that the space-separated numeric list is in the LIST
+attribute on the object -- LIST was "1 10 83 4" in the earlier example --
+and we want to also compare it to the number 25, we end up with the
+following:  s(\[MAX([iter(v(LIST),{##,})] 25)\])
+
+The parser reacts in the following manner:  it sees the S()
+function, and goes to evaluate the argument inside. The argument inside
+evalutes to [MAX(1, 10, 83, 4, 25)] -- the ITER() generates the string
+"1, 10, 83, 4, " and concatenated with the 25, generates the above string.
+Because of the '\' escapes, MAX is considered a string and not a function;
+the '[]'s around the ITER() force that evaluation to complete. Now, the
+S() function evaluates [MAX(1, 10, 83, 4, 25)], which is 83, our desired
+result.
+
+This technique works, in general, for converting any space-separated
+list to a comma-separated list to be passed to a function which requires
+comma-separated arguments.
+
+
+14.5	Recursion
+
+"Recursion" is a difficult term to define; it can be loosely
+described as a process by which an expression uses itself to determine
+its value. A "recursive function" calls itself, stopping when it reaches
+a "base case". This can probably be best illustrative via an example.
+
+The mathematical expression "n!" ("n factorial") means the
+product of all whole numbers between 1 and n, or, since formal sigma
+(summation) notation is difficult to write in pure ASCII, informally 
+expressed by the formula:    n! = (n)(n - 1)(n - 2)(n - 3)...(1)
+For example, 4! = (4)(3)(2)(1) = 24.  One quickly notes, however, that
+this is equal to (4)(3!) = (4)(3)(2!) = (4)(3)(2)(1)
+Therefore, we can write:   n! = (n)((n - 1)!)
+Because the factorial expression is used to determine a factorial,
+we can say that the factorial function is recursive.
+
+All recursive expressions must have some kind of base case;
+otherwise, the function will continue to evaluate itself forever.
+For the factorial function, the base case occurs when n = 1; the
+function simply returns 1.
+
+* * * * *
+
+Recursion can be done quite simply in MUSH, although the built-in
+function evaluation limit prevents the "stack" of functions from
+growing too large. We can write a U() function to evaluate factorials,
+using a SWITCH() to check for the base case:
+
+&FACTORIAL_FN object=[switch(%0,1,1,mul(%0,u(FACTORIAL_FN,sub(%0,1))))]
+
+The expression "[u(object/FACTORIAL_FN,4)]" will return "24".
+Note that this is a literal translation of the mathematics involved. "If 1, 
+return 1. Else, multiply our current number by the factorial of our current 
+number minus 1."  One of the beauties of recursion is that it usually 
+follows quite naturally from the verbal description of the algorithm.
+
+* * * * *
+
+There is a built-in function called FOLD() which is intended for
+use in recursion. The first argument to FOLD() is the name of an attribute
+which is to be treated as a U(), and the second argument is a list whose
+members will be passed one at a time as %1 to the U() evaluation. (Note
+that the U() function is not directly involved in the FOLD() operation,
+but the attribute is evaluated like a U(), so for convenience's sake, we'll
+call it a U() evaluation). If there is no third argument, which could be
+called a base case, the first element passed for the first time is given
+as %0. Normally, the result of the previous evaluation is passed as %0.
+
+To translate our factorial function into FOLD()'s syntax, we need
+to generate a list. The obvious method is to generate a list of all numbers
+between 1 and n, and multiply them all together. The LNUM() function will
+generate all numbers between 0 and n-1, so to get all numbers between
+0 and n, we must use LNUM(add(%0,1)). To eliminate that 0, we use the
+REST() function.
+
+&FACTORIAL_FN obj=[fold(FACT_AUX_FN,rest(lnum(add(%0,1))),1)]
+&FACT_AUX_FN obj=[mul(%0,%1)]
+
+This is considerably faster than the "pure" recursive method, and has
+the additional advantage of not running us up against the function 
+recursion limit. Under a normal recursion limit, our first try at
+writing the factorial function fails when n is greater than 9; using
+FOLD(), we don't hit the recursion limit at all, since the nesting
+is never more than 3 functions deep (1 is the U() call to FACTORIAL_FN,
+2 is the call to FOLD(), and 3 is the call to MUL()).
+
+* * * * *
+
+Most people probably don't compute factorials in their daily
+MUSHing. A more practical application of recursive technique is the
+"pretty printing" of output into columns. If, for example, we wish to
+print a list in three columns, we should check to see if our current
+list has 3 words or less, and, if so, print them; otherwise, we should
+print the first three words, a newline, and then call our column function
+again on the remainder of the words in the list (i.e. word #4 on).
+This can be written as:
+
+&COLUMN_FN object=[switch(gt(words(%0),3),
+    0,[u(FORMAT_FN,%0)],
+    [u(FORMAT_FN,extract(%0,1,3))]%r[u(COLUMN_FN,extract(%0,4,words(%0)))])]
+
+&FORMAT_FN object=[first(%0)]%t[first(rest(%0))]%t[rest(rest(%0))]
+
+Thus, the expression "[u(COLUMN_FN,lnum(8))]" gives us
+
+0	1	2
+3	4	5
+6	7
+
+By changing FORMAT_FN, we can do other interesting things with our words;
+the example above is not necessarily the optimal way to pass arguments
+to FORMAT_FN, if the expression is very complex; it might be better to
+pass FORMAT_FN three arguments, doing the FIRST()/REST() extractions
+before calling FORMAT_FN.
+
+This is another case where FOLD() is useful. Because we can only
+grab one item off our list at a time when using FOLD(), we need to have
+some other way of determining when to insert a carriage return. For 
+three-column output, we want to insert a carriage return every three
+words; therefore, if the number of words in the string is divisible by 3,
+we add a newline, otherwise, we add a tab. The code is then quite simple:
+
+&COLUMN_FN object=[fold(FORMAT_FN,%0)]
+&FORMAT_FN object=%0[switch(mod(words(%0),3),0,%r,%t)]%1
+
+* * * * *
+
+FOLD() can also be used to randomize a list under 2.0 (there is a
+built-in function, SHUFFLE(), in 1.50 and 2.2, which randomizes
+lists).  The list cannot be too large, or the function invocation
+limit will cause an error, but using FOLD() is still more reasonable
+than most other list randomization methods.
+
+What we want to do is to take the elements of the list one at a time
+and randomly put them into positions of another list. This can be
+done, fairly effectively, by doing the following:
+
+1. Start with a blank new list.
+2. Take an element of the original list. Put it in the new list.
+3. Take the next element of the original list. Put it either before or
+   after the element of the new list.
+4. Take the third element of the original list. Insert it into the new
+   list at a random position.
+
+We can use FOLD() to accomplish this, with %0 as the new list,
+and %1 as an element, using the following code:
+
+&SHUFFLE_FN object=[fold(SHUFFLE_LIST_FN,%0)]
+&SHUFFLE_LIST_FN object=[insert(%0,add(rand(words(%0)),1),%1)]
+
+* * * * *	
+ 
+Finally, FOLD() is very good for dealing with space-separated
+lists that need to be passed to functions which require comma-separated
+arguments, such as the example of MAX() used earlier in this manual
+section. Given an attribute LIST, containing something like "1 10 83 4",
+one can find the maximum of the numbers in it using this code:
+ 
+&MAXLIST_FN object=[fold(MAXTWO_FN,rest(v(list)),first(v(list)))]
+&MAXTWO_FN object=[max(%0,%1)]
+
+* * * * *
+
+Recursion is a very natural technique for generating output
+which follows a clearly defined pattern. Unfortunately, due to the
+function recursion and invocation limits, it is frequently not a
+usable for large values (or long lists, etc.), unless you are using
+FOLD() or some other technique for reducing the number of functions
+on the stack at a given time. Nonetheless, it can be the fastest
+and cleanest way to accomplish a task, and it is not a technique
+which should be overlooked.
+
+
+---------------------------------------------------------------------------
+
+
+15. Efficiency
+
+15.1	Parameter Passing
+
+MUSH evaluates every single expression it receives; it has no
+memory of what has already been evaluated. Thus, if you write something
+like "[extract(get(#100/list),2,1)] [extract(get(#100/list),5,1)]",
+the "get(#100/list)" is evaluated twice. This isn't disastrous, but
+if instead of "get(#100/list)", you had something like 
+"iter(setinter(lattr(#100/DATA_*),lattr(#100/NUM_*)),mid(##,rand(5),rand(2)))"
+(probably expressed as a U() function), repeating the same thing twice
+would be extremely inefficient.
+
+The best way to avoid evaluating complex expressions multiple times
+is to pass them as arguments to a U(). Because having extra function calls
+generates more overhead, this is a technique which should be restricted
+to those instances where the expressions are either very complex, use
+computationally expensive operations (such as SETINTER() and other sorting
+functions, ITER(), and large SWITCH() expressions), or are used three or
+more times.
+
+The second example above is an excellent candidate for such
+reduction. The best way to write it would be something of the form:
+
+&EXPR_FN object=[u(AUX_FN, iter(setinter(lattr(#100/DATA_*),lattr(#100/NUM_*)),
+	mid(##, rand(5), rand(2))), 2, 5)]
+
+&AUX_FN object=[extract(%0,%1,1)] [extract(%0,%2,1)]
+
+This might be further improved by putting the ITER() in an expression by
+itself; it's still of bearable length, but if that particular ITER()
+is used another time in the same MUSH program, it should definitely go
+into a U().
+
+			----------
+
+One alternative to using U() parameters to avoid evaluating an
+expression twice is the SETQ()/R() function combination. There are ten
+"registers", 0 through 9, which can be used for temporary storage.
+The registers are local to a command list -- that is, they persist
+through more than one queue cycle, within the direct chain of
+evaluation, as triggered by a $command, attribute/oattribute/attribute,
+or the like.  They are set via the function evaluation
+"[setq(<register number>,<expression>)]".  This expression evaluates
+to a null string, and therefore can be inserted into a string without
+affecting its value. The R() function is used to retrieve the
+appropriate register; the %q percent-substitution is equivalent
+to this function.
+
+The order of parser evaluation definitely makes a difference
+when using SETQ(). It is advisable to put all SETQ() functions at
+the beginning of any function evaluation; expressions are evaluated
+left to right, outside to inside, and you can check whether or not
+values are being set in the order you think they are via use of the
+DEBUG flag, but for clarity, SETQ() expressions should be placed
+at the beginning of the string. Also, you should make sure that 
+nested U() functions don't attempt to use the same registers; remember
+that registers are local to a command evaluation, _not_ to a function
+evaluation.
+
+If you need to have nested U() functions that re-use registers (for
+example, you have some extremely complex computations that require
+large numbers of temporary variables), you may wish to consider use
+of the ULOCAL() function instead. This function is identical to U(),
+save that R() registers within it are considered "local variables".
+That is, the original values of the registers are restored when the
+inner function exits, and the original values _are_ passed into the
+inner function. In this respect, they are somewhat like VAL parameters
+in Pascal, or like ordinary function parameters in C.
+
+You should, however, avoid the unnecessary use of ULOCAL(). While
+syntatically cleaner than U(), the copying of variables which is
+necessary to preserve the old values also increases the computational
+cost of the function. Do, however, note that any use of SETQ() within
+a global-defined @function should ALWAYS be done within ULOCAL() unless
+you deliberately intend to change the value of the register for the
+remainder of the associated command list; otherwise, you might 
+inadvertently change a value that the calling user is attempting
+to preserve.
+
+* * * * *
+
+Please note that SETQ() is a FUNCTION, not a command. It should thus
+be nested within a command, NOT placed on its own. In other words:
+
+RIGHT: $test *: @pemit %#=[setq(0,revwords(%0))][u(A_FN,%q0)]--[u(B_FN,%q0)]
+WRONG: $test *: [setq(0,revwords(%0))]; @pemit %#=[u(A_FN,%q0)]--[u(B_FN,%q0)]
+
+The most obvious use for SETQ() is to cut down the number of
+times a complex expression is evaluated; all that is needed is a single
+evaluation as part of a SETQ(). A secondary use is as temporary storage
+for some variable needed by FOLD(), FILTER(), or similar functions that
+take a limited number of parameters. For example, it is frequently
+desirable for a FILTER() to know the dbref of the enactor. But
+because the U()-type function called by FILTER() only knows about
+the one element of the list being evaluated, it can't get the enactor
+unless that information is stored someplace else. In that case, simply
+setting '%#' into an R()-register solves the problem.
+
+* * * * *
+
+Related to intelligent parameter-passing is U()'s usefulness
+as a tool for hiding details of implementation. For example, there are
+many different ways to count the number of times a word occurs in a list.
+If a U() called COUNT_FN is used, instead of writing out the expression 
+every time, by simply changing the COUNT_FN attribute, different methods
+can be tried. For example, any of the following would work, if %0 is the
+list and %1 is the word:
+
+&COUNT_FN object=[sub(words(%0),words(edit(%b%0%b,%b%1%b,%b)))]
+
+&COUNT_FN object=[words(iter(%0,switch(%0,%1,%0)))]
+
+&COUNT_FN object=[setq(0,%1)][filter(AUX_FN,%0)]
+&AUX_FN object=[eq(comp(%0,%q0),0)]
+
+&COUNT_FN object=[setq(0,%1)][fold(AUX_FN,%0,0)]
+&AUX_FN object=[add(%0,eq(comp(%0,%q0),0))]
+
+* * * * *
+
+Sometimes, you will want to use the same complex function evaluation
+across several commands. In this case, if you have something sufficiently
+large and don't mind the extra queue cycle needed, you can use @trigger
+to pass that function evaluation as a parameter. @trigger is extremely
+useful for parameter manipulation; this is one of the few ways that the
+stack variables %0 through %9 can be directly manipulated. Do not ignore
+its use as a method for reducing the number of complicated functions that
+need to be evaluated.
+
+
+15.2	How the Queue Works
+
+The "queue" is the place where all commands are placed before
+being run. A queue is exactly what it sounds like; the first command
+to be put on the queue is the first command to be executed (the queue
+is executed from "head" to "tail"). New commands are always put at
+the tail end of the queue.
+
+The mysterious MUSH queue is actually three separate queues.
+They are referred to as the "Player", "Object", and "Wait" queues.
+The first queue is the where commands that are going to be immediately
+executed are placed. This includes anything directly typed by a connected
+player, plus the first X commands from the object queue (where X is usually
+between 0 and 50. It is 3 by default.)  The second queue is where anything
+done by an object is placed; when the commands are due to be executed, they
+are placed on the player queue. The third queue is where all objects waiting
+for some event to occur are placed; when its wait expires, an action in the
+wait queue is moved onto the command queue.
+
+The MUSH executes a loop which can be simplified down to:
+
+1. Check to see if any waits have expired. If so, put those commands
+   in the command queue.
+2. Check to see if anybody typed anything, and if so, put those commands
+   in the player queue.
+3. Put X commands from the command queue into the player queue.
+4. Execute the player queue. This may cause more commands to be put
+   at the end of the command queue.
+5. Go to 1.
+
+We can think of the player and command queues as simply being a
+single queue, as long as we  keep in mind that something typed from the 
+keyboard frequently executes before a command issued by an object.
+
+Every command in MUSH is a single item on the queue. For the
+purposes of this discussion, we will call a "queue cycle" one such
+command (rather than referring to a queue cycle as one iteration of
+the loop given above, since that's a purely internal measure). Every
+command that an object gives is put on the end of the queue.
+
+* * * * *
+
+Certain commands "nest" other commands. For example, the @switch command
+frequently takes the format:
+
+@switch %0=foo, {@pemit %#=Got it.}, {@pemit %#=Failed.}
+
+The game does not queue up the @switch and the @pemit one after another.
+Instead, it executes the @switch, then puts the correct action at the
+end of the queue. Thus, several other commands may occur between the
+@switch and the @pemit.
+
+This is further complicated by the way action lists (commands
+of the format "@@ action 1; @@ action 2; @@ action 3") are handled.
+Given that expression, those three actions are queued one after another.
+However, nested action lists are considered part of command they are
+part of, and are not queued up until that command is executed. For
+example: "@emit 0; @switch %0=foo, {@emit yes; @emit YES},
+{@emit no; @emit NO}; @emit 1" is queued as the following:
+
+@emit 0
+@switch %0=foo, {@emit yes; @emit YES}, {@emit no; @emit NO}
+@emit 1
+
+The first command is executed as you would expect, and the output is "0".
+Next, the @switch is executed. The resulting actions are put at the tail
+of the queue, so the queue becomes (assuming %0 is foo):
+
+@emit 1
+@emit yes
+@emit YES
+
+Note that the "@emit 1" executes BEFORE the @emits associated with the
+@switch, despite the fact that when the code is typed, the "@emit 1"
+comes after the @switch.
+
+This behavior also applies to @dolist, @force, @wait, @trigger,
+and all other commands which execute other commands. This can be acutely 
+obvious when you have a construction like:
+
+@emit Begin; @dolist a b c=@emit ##; @emit End
+
+This produces:
+
+   Begin
+   End
+   a
+   b
+   c
+
+That behavior is extremely important when you have commands which must
+execute only _after_ all commands in a @dolist has finished executing;
+in that type of case, a @wait, either timed or semaphore, is usually 
+the best solution.
+
+
+15.3	Pipelining
+
+"Pipelining" is a term borrowed from the jargon of microprocessors. In
+that field, it refers to the practice of feeding the next instruction
+to the CPU, before the previous instruction has completed. The
+"pipeline" ensures that there will always be an instruction waiting
+for the CPU.  If the previous instruction was a branch and the
+processor predicts the incorrect next instruction, the processor must
+then go fetch the correct next instruction; nonetheless, this is not a
+loss, since, had there not been a previous fetch, there would have
+been a delay anyway while the processor went hunting for the
+instruction.
+
+A similar principle can be applied to MUSH programming. Simply put,
+there are many MUSH commands which do something along the lines of
+the following:
+
+$test *: @switch/first num(*%0)=#-1, {@pemit %#=No such player.},
+         {&TEST_OWNER %#=owner(*%0); @pemit %#=Owner test set.}
+
+Note that no matter what happens, you will always have at least two
+commands to queue: the @switch, and the @pemit. In the case of correct
+syntax, there'll be three commands: the @switch, the @pemit, and the
+attribute set.
+
+This doesn't make sense, from the viewpoint of efficiency. Since the
+correct case is going to be the one encountered the most frequently,
+it shouldn't, ideally, be any slower than the error case.
+
+You can usually save yourself a queue cycle by doing the following:
+
+$test *: @pemit %#=switch(num(*%0),#-1,No such player.,Owner test set.);
+         &TEST_OWNER [switch(num(*%0),#-1,#-1,%#)]=owner(*%0)
+
+Basically, we "assume" that the set is going to succeed, most of the time,
+and go ahead and do it anyway; to avoid accidentally scribbling on the
+attribute if we've encountered an error, we SWITCH() to make the object
+try to set TEST_OWNER on a non-existent object in the case of an error.
+We have, granted, added extra wildcard matches by the use of two
+SWITCH() statements where before there was a single @switch, but we've
+saved on a queue cycle, so we've probably won, overall -- this varies
+on a case-by-case basis, of course.
+
+We can do this sort of "pipelining" for @trigger, @dolist, and similar
+things. It's no longer more efficient when there are more than two queue
+cycles involved, but since many MUSH situations do reduce down to something
+of this format, this "pipelining" technique proves extremely useful.
+
+
+15.4	Queue Cycles vs. CPU Cycles
+
+One of the major drawbacks to the "switchless" coding style is
+that it tends to reduce the queue cycles needed to perform an action
+at the expense of short evaluation times for a command. While the action
+may take less time to execute, because other objects' queued commands are
+not getting executed between each stage of the action, the overall 
+computation time ("CPU cycles") needed by that action group may not be
+significantly reduced, or, indeed, may actually be increased.
+
+Switchless coding tends to eliminate @switch and @trigger, two
+commands which force a "delay", due to the property of these two commands
+described in the earlier section on the workings of the queue. In doing
+so, however, the programmer frequently uses complex function evaluations
+which take a long time to evaluate, and, worse still, may evaluate the
+same expression repeatedly.
+
+One simple example of such a tradeoff is the following:
+
+@va object=$test *: @pemit %#=[extract(v(colors),match(v(list),%0),1)]
+	[extract(v(sizes),match(v(list),%0),1)] [match(v(list),%0,1)]
+
+  vs.
+
+@va object=$test *: @trigger me/vb=%#,[match(v(list),%0)]
+@vb object=@pemit %0=[extract(v(colors),%1,1)] [extract(v(sizes),%1,1)] %1
+
+The second way is slower, since it takes two commands instead of one,
+but it's also more efficient. The best way to do the above would be
+
+@va object=$test *: @pemit %#=
+	[setq(0,match(v(list),%0))][extract(v(colors),r(0),1)]
+	[extract(v(sizes),r(0),1)] [r(0)]
+
+
+One must also remember that even if the total time to evaluate
+a switchless and non-switchless version of the same action is the same,
+other players are forced to wait longer for their commands to execute
+under the switchless, because the game is running the big complex 
+evaluation all at once. While the _total_ time spent waiting remains
+constant, the time-between-each command is increased.
+
+Therefore, considerate programmers don't program gigantic
+expressions which hog the server for several seconds at a time. Good
+programmers find better ways to split up the evaluation, so that it
+doesn't take several seconds to evaluate. If you write something which
+lags a MUSH running at an ordinary speed, you haven't programmed it well.
+
+As more programmers code switchless style, the amount of time
+between each command increases. On a fast MUSH, the difference is not
+generally noticeable, but if you really want to know if your code is
+any good, try running it on a slow machine (NOT a slow network -- you
+should victimize a MicroVAX or something similar). The switchless style
+when used intelligently shouldn't slow down the game, but it's far too
+easy to abuse. Function invocations should be kept to a minimum. 
+In general, if an attribute containing a command list exceeds about 12
+lines of text, it is Too Large.
+
+Intelligent use of switchless programming usually generates strings to
+be outputted. Using massive nested switch() constructs usually implies
+that something is not as efficient as it could be; the same is true
+with iter(). The way a list is stored is frequently more important
+than the way it is accessed; by storing data differently, it's often
+possible to cut down on the complexity of retrieval.  The switchless
+style is best when it eliminates large numbers of nested @switch's;
+other uses, especially those involving recursion, should be carefully
+considered before being used.
+
+----------
+
+That's the end of this manual; I hope it's been helpful. Please remember
+that this is copyrighted material; I've put a lot of work into this and
+am not likely to be pleased by others stealing my work. Please see the
+first section of this manual for the terms of the copyright and other
+information.
+
+Comments, corrections, and suggestions should be emailed to Amberyl,
+at lwl@netcom.com

@@ -1,0 +1,265 @@
+MUSH Manual Version 2.008
+  Written for TinyMUSH version 2.2.1
+              TinyMUSH version 2.0.10 patchlevel 5
+              PennMUSH version 1.50 patchlevel 12
+              MudCore Starter Database version 1.0
+  Copyright 1993, 1994, 1995, Lydia Leong (lwl@netcom.com / Amberyl)
+ 
+Section I: Getting Started. Basic commands and objects.
+
+Introduction: A brief history of MUSH. Configurations and server differences.
+
+1. The Basics
+ 1.1  Some information
+        Common terms used on MUSHes.
+        The format of this manual.
+ 1.2  Basic commands
+         Looking around: look, examine, @decompile, TERSE, MYOPIC, @grep
+         Communications: ", :, @emits, page, whisper, basic flags and @set,
+            HAVEN, GAGGED, NOSPOOF
+         Going places: JUMP_OK, @tel, @whereis, UNFINDABLE
+         Objects: get, drop, give, ENTER_OK, inventory
+         Command syntax, @set and flags, special commands, @list
+ 1.3  Attributes: @desc, @succ, @fail, @drop, @kill, IMMORTAL, @move, @sex
+ 1.4  Editing: @edit, @mvattr, @cpattr
+ 1.5  Do it!  --  basic character set-up
+ 1.6  A parser discussion
+2. Objects
+ 2.1  Basic object commands: @create, @destroy, @force, @name, VISUAL
+ 2.2  Puppets - the PUPPET flag. ROBOTs.
+ 2.3  A Note about Privacy: @sweep
+ 2.4  Attributes on Objects: Action Lists
+ 2.5  Machines: @cost, @pay, and @clone, QUIET and DESTROY_OK flags, @parent
+ 2.6  Limiting object uses: @charges and @runout
+ 2.7  Reacting to the environment: @listen and @ahear, ^, LISTENER/MONITOR
+ 2.8  Keeping your objects safe: @lock, @unlock, @chown, CHOWN_OK, STICKY,
+         @search, @find, @stats
+ 2.9  Do it!  --  falcon
+ 
+Section II: Building and an introduction to programming
+
+3. Building.
+ 3.1  Creating a room: @dig, FLOATING flag
+ 3.2  Connecting rooms: @open, @link and @unlink, LINK_OK flag, @entrances
+ 3.3  Refinements: ABODE and JUMP_OK flags, drop-tos and STICKY flag on rooms
+ 3.4  Exit conventions and the TRANSPARENT flag
+ 3.5  Do it!   --  home
+4. Introduction to Programming
+ 4.1  The stack and string substitutions - % substitutions
+ 4.2  General attributes and action lists - @trigger and GET()
+ 4.3  The queue: @ps, @wait, and @halt. HALT flag
+ 4.4  Decision making: @switch
+ 4.5  Other ways of triggering: @use and @startup
+ 4.6  User-defined commands:  $command, @scan, @verb
+ 4.7  Introduction to functions: ADD() and other math, RAND(), TIME()
+ 4.8  Do it!  --  falcon control
+
+Section III: Programming applications
+
+5. Vehicle programming
+ 5.1  Entering and leaving objects: @enter, @aenter, @oenter, @oxenter,
+      @leave, @aleave, @oleave, @oxleave
+ 5.2  Inside vehicles: @idesc, @listen, relays, and commands, @remit, 
+      AUDIBLE, @prefix, @filter, @forwardlist
+ 5.3  Do it!  --  Wagon controller
+6. Complex programming
+ 6.1  Useful functions: 
+         General use: NUM(), LOC(), NEARBY()
+         List creation: LCON(), LEXITS(), LWHO()
+         Parsing: POS(), FIRST(), REST(), STRLEN(), MID(), WORDS()
+         Matching: EXTRACT(), MATCH(), MEMBER(), UCSTR(), LCSTR(), CAPSTR()
+ 6.2  Non-standard attributes: & and attribute flags
+ 6.3  Introduction to @dolist
+ 6.4  Time synchronization: semaphores, complex @wait, @notify, @drain
+ 6.5  Security problems in programming, INHERIT, ESCAPE(), and SECURE(),
+         @fsay, @femit, @fpose
+ 6.6  Debugging: PUPPET and VERBOSE
+ 6.7  On the New Programming Style
+7. MUSH Programming: QuickStart Guide
+ 7.1  Basic syntax
+ 7.2  Conditional and loop constructs
+ 7.3  Functions
+
+
+Section IV: A Guide for Administrators
+
+8. Owning and seeing everything
+  8.1  Special privileges, ROYALTY, and Powers
+  8.2  Attribute ownership - @atrchown and @atrlock
+  8.3  Object ownership - @chown and @chownall
+  8.4  The queue - @ps and @allhalt, @kick
+  8.5  The database - @entrances, @find, @search, and @stats
+  8.6  A note about security and privacy
+  8.7  The Master Room and command processing
+9. Wiz-specific commands
+  9.1  Talking to other wizards: @wizwall and @wizemit
+  9.2  Messages: @wall, @listmotd, @motd, and @wizmotd
+  9.3  Locking out players: @login and @rejectmotd
+  9.4  Dealing with players: @newpassword, @pcreate, @boot, @toad, and @destroy
+  9.5  Dumping the database: @dump and @shutdown
+10. Database control
+  10.1  Quota system: limited object creation - @allquota, @quota, and @squota
+  10.2  Money control: give and @poor
+  10.3  Consistency checking: @dbck and @purge, @dump/paranoid, @cut, @fixdb
+11. Zones
+  11.1  Object zones
+  11.2  Parent room zones
+  11.3  ZoneMaster players
+  11.4  Some notes on local wizard control
+12. The Fundamental Laws of Wizarding
+  12.1  Wizard Etiquette
+  12.2  The Five-Step Method of player management
+          warning - nasty warning - gag - boot - newpassword
+  12.3  Wizard commands and when they ought to be used
+
+Section V: The Art of Psychocoding
+13. Basic Concepts
+  13.1  Attribute naming and coding style
+  13.2  String concatenation and the switchless style
+  13.3  What the parser really does
+  13.4  Zones in TinyMUSH 2.2
+14. List manipulation
+  14.1  Adding to, removing from, and comparing lists
+  14.2  Function building blocks: U() and SWITCH(), @function
+  14.3  Formatting strings: SPACE(), REPEAT(), LJUST(), and RJUST()
+  14.4  Lists instead of @dolists: ITER() and FILTER()
+  14.5  Recursion: theory and practice, FOLD()
+15. Efficiency
+  15.1  Parameter passing: U(), ULOCAL(), local registers, SETQ(), and R()
+  15.2  How the queue works
+  15.3  Pipelining
+  15.4  Queue cycles vs. CPU cycles
+
+-----------------------------------------------------------------------------
+
+
+This is the table of contents for Amberyl's MUSH manual. She can be
+found on PernMUSH, or at lwl@netcom.com. This manual should be current
+through TinyMUSH version 2.2.1, and PennMUSH version 1.50 patchlevel 12.
+Much of it should also apply to TinyMUSH version 2.0.10 patchlevel 5
+(from which TinyMUSH 2.2 is derived). Differences between the two
+versions will be noted where necessary; in general, 2.0 will refer to
+features common to both 2.0 and 2.2, and 2.2 will denote features
+specific to 2.2. Do note that because 2.0.10p5 is now an obsolete
+version, and 2.0.10p6 is not much more advanced, that there may be
+sections of this manual which simply do not function under those
+code versions, or which require modification (for example, 2.0.10p5
+does not have the %q-substitution, though it does have the R() function).
+
+This manual version also covers commands that are softcoded in MUSH,
+found in the MUSHcode starter database called MudCore. MudCore global
+commands are found on a variety of MUSHes, most notably PernMUSH and
+AmberMUSH; it is convenient to mention them in this manual, since
+many tasks can be simplified by use of these globals, and even those
+MUSHes that don't use MudCore or the equivalent do have globals which
+perform similar functions.
+
+The 2.0x manual series is a complete rewrite using the 1.15 manual as
+a starting base. Unlike the previous manual, this one is intended to
+replace anything that has come before, including Croaker's manual,
+which is pretty much obsolete for this version of code.
+
+Those programming MUSE should probably look at the 1.15 manual release
+instead, or use Falryx's MUSE Manual, which is based upon this manual
+(with permission). The MUSE parser is quite close to the original 1.x
+parser, and the basic examples in this manual should work without any
+problems. The MUSE powers system and related issues are beyond the
+scope of this manual (and the author's knowledge, for the most part);
+the helptext for MUSE and consultation with a MUSE programmer are
+probably the best ways to figure out how to program MUSE.
+
+TinyTIM players may still find Croaker's manual helpful. There is also
+a TinyTIM supplemental manual, since TIM has diverged quite a bit from
+the "mainstream" MUSH. The contents of the PernMUSH 1.15 manual and
+this manual may or may not apply to TinyTIM. The parser on TIM,
+however, is fairly similar to the standard 1.x parser. There is,
+however, probably little of interest in this manual for the TinyTIM
+player, since most of the features mentioned here do not exist on TIM.
+
+This is the tenth revision of this manual. There have been some major
+revisions in the servers since the prior revision, though these
+primarily affect advanced programming techniques and administrative
+commands. This manual only documents the most important of these; for
+the rest, the helptext should suffice.
+
+I have also corrected a number of previous errors, and further
+expanded the notes on advanced programming techniques, which seem to
+be in great demand. There are also a number of formatting changes,
+which, in my opinion, make the text easier to read. A fair amount of
+the text has been expanded (and hopefully clarified); I've also chosen
+to introduce more "advanced" programming techniques earlier in the
+manual. Finally, I've taken the opportunity to explicitly debunk a few
+myths about MUSH programming, as well as provide specific methods for
+things that I often see programmed incorrectly or inefficiently.
+There are a lot of small changes, and a few sections added and
+removed. The structure of this manual is slowly becoming obsolete,
+due to the changing methods of MUSH programming, and, specifically,
+learning to program MUSH; it is likely that future revisions of the
+manual will restructure substantial portions of the text.
+
+The tenth revision is also the first version of the manual to document
+a softcoded package of MUSHcode, in this case, the MudCore Starter
+Database. I regard the standardization of certain core pieces of
+softcode as something which will ultimately make the transition from
+one MUSH to another much easier, and thus I'm going to attempt to
+support a standard by placing it in the manual. MudCore is slated 
+for an early-summer 1995 release; portions of it can be found on
+games such as PernMUSH and AmberMUSH.
+
+The ninth revision of the manual was relatively minor, correcting
+previous mistakes, expanding various bits of material, attempting to
+clarify the somewhat confused earlier explanation of semaphores, and
+adding additional material on advanced programming topics.
+
+The eighth revision of the manual was the first to cover advanced
+programming, in a newly added section. The rest of the manual,
+however, is not meant to be a guide to advanced programming, nor does
+it necessarily show the "best" way to do something. It is intended to
+show the most intuitive and basic way to get something done in MUSH.
+It is also not a complete guide to MUSH; for that, you need to look at
+the helptext. This manual is meant to act as a tutorial and as a
+pointer to some of the more useful things available in MUSH, as well
+as to clarify some of the things that are not easily covered in the
+helptext. For the precise syntactic details on a command, look up the
+help text; especially in the latter sections, this manual attempts to
+avoid duplicating material found in the help, concentrating instead on
+techniques and details.
+
+The final "advanced programming" section of the manual convers the
+"new" style of MUSH programming, which relies heavily on list
+manipulation functions and string concatenation to produce the desired
+result. This is commonly referred to as the "switchless style". While
+I believe this is something best learned on one's own, an overview of
+the common techniques is presented here. It also includes a discussion
+of how to write programs that are efficient in their use of queue
+cycles, without overburdening the server itself with very large,
+complex function evaluations.
+
+If you spot any errors in the manual, PLEASE send me email. You should
+mention the specific MUSH version you are using, and mention as
+specifically as possible where the error is.
+
+Finally, by way of thanks to the various people who have, in the past,
+contributed examples/typo reports/etc. to this manual, I've thrown
+their names in as player examples in various places. I hope they enjoy
+their brief moment of fame.
+
+A "README.mushman" file accompanies this manual distribution,
+and must be retained with any electronically-retrievable version of
+this manual. To summarize the copyright notice contained therein:
+
+This manual was written by Lydia Leong (lwl@netcom.com), and any
+rights and privileges of reproduction are hers, in accordance with
+United States or international Copyright Laws. Users are granted
+permission to print and reproduce this manual in its unmodified
+entirety, as long as this copyright notice is retained and due credit
+given, and the material remains free of charge. It can be quoted, with
+credit, within the bounds set by standard academic protocol. It may
+NOT be used within another major document (such as another manual),
+nor published in print form (whether or not the publisher makes a
+profit from such publication), nor may it be hypertextified or
+otherwise changed in format, without the explicit permission of the
+author. 
+
+
+     --  Amberyl, May 22nd, 1995

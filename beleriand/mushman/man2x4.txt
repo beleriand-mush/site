@@ -1,0 +1,754 @@
+MUSH Manual Version 2.008:
+   Copyright 1993, 1994, 1995, Lydia Leong (lwl@netcom.com / Amberyl)
+   Last revised 5/22/95.
+
+Section IV: Wizard's supplement
+
+8. Owning and seeing everything
+  8.1  Special privileges, ROYALTY, and Powers
+  8.2  Attribute ownership - @atrchown and @atrlock
+  8.3  Object ownership - @chown and @chownall
+  8.4  The queue - @ps and @allhalt
+  8.5  The database - @entrances, @find, @search, and @stats
+  8.6  A note about security and privacy
+  8.7  The Master Room and command processing
+9. Wiz-specific commands
+  9.1  Talking to other wizards: @wizwall and @wizemit
+  9.2  Messages: @wall, @listmotd, @motd, and @wizmotd
+  9.3  Locking out players: @login and @rejectmotd
+  9.4  Dealing with players: @newpassword, @pcreate, @boot, @toad, and @destroy
+  9.5  Dumping the database: @dump and @shutdown
+10. Database control
+  10.1 Quota system: limited object creation - @allquota, @quota, and @squota
+  10.2 Money control: give and @poor
+  10.3 Consistency checking: @dbck and @purge, @dump/paranoid, @cut, @fixdb
+11. Zones
+  11.1 Object zones
+  11.2 Parent room zones
+  11.3 ZoneMaster players
+  11.4 Some notes on local wizard control
+12. The Fundamental Laws of Wizarding
+  12.1 Wizard Etiquette
+  12.2 The Five-Step Method of player management
+        warning - nasty warning - gag - boot - newpassword
+  12.3 Wizard commands and when they ought to be used
+
+
+This section was written with the 1.50 wizard in mind. If something is 
+mentioned that doesn't exist in 2.0, and you're only interested in 2.0,
+ignore it.  If you're going to play with the 2.0 wizard commands that 
+aren't covered in this section, you probably know what you're doing and 
+therefore don't really need those commands covered in this manual anyway. 
+All wizards, however, will probably find something useful in section 12, 
+which provides general rules for wizarding. Mortals may find it interesting 
+reading.
+
+
+8.  Owning and seeing everything
+
+8.1     Special Privileges, ROYALTY, and Powers
+
+
+A wizard, by definition, owns and controls everything except for God.
+A wizard may manipulate any object by using its dbref number, or by using
+*player. Remote get, look, and examine work, and a wizard may bypass the HAVEN
+flag by using "w *<player>=<message>" to whisper a message.
+
+A wizard may look at anything by looking at the dbref number, or by
+looking at *player. Warning: in 2.0 this triggers the odesc and adesc messages.
+The format of "look" for wizards is somewhat different: the object's name
+and dbref number is displayed on the line above the description. When looking
+at exits, the full exit name - including aliases - is displayed. 
+
+Wizards can teleport to anywhere. In 1.50, the NO_TEL flag and 
+teleport locks do not have any effect at all on wizards; in 2.0, however,
+wizards ARE affected by teleport locks. In 2.2, this is configurable.
+
+The UNFINDABLE flag does not prevent wizards from locating a player.
+A wizard can also obtain a player's location by using loc(*player), and get
+any attribute. There is _nothing_ in the database that a wizard cannot see,
+except for things like the password attribute and other "internal"
+dark-to-all attributes.
+
+The LWHO() function allows wizards to obtain a list of dbrefs
+of connected players. Also, in 1.50, wizards may watch connects and 
+disconnects by setting the MONITOR flag on themselves, or grant the 
+ability to do the same to another player. (NOTE: the 1.50 MONITOR flag
+is NOT like 2.0 MONITOR; the equivalent of 2.0 MONITOR is 1.50 LISTENER.
+2.0 has no equivalent of 1.50 MONITOR). In both 1.50 and 2.0, WHO for 
+wizards shows an extended listing with connect sites and other special 
+information; to see the listing that mortals get, use the command DOING 
+instead.
+
+* * * * *
+
+Pern version 1.14 introduced a ROYALTY flag (which can optionally be
+turned off at compile-time). This flag is settable by wizards. Objects
+ROYALTY can examine and teleport like wizards, but have no other wizard 
+powers; all of the statements about wizards above also apply to ROYALTY.
+This flag does not exist in 2.0.
+
+PennMUSH 1.50 patchlevel 7 introduced a powers system. This
+enables wizards to grant specific objects, including players, the power
+to accomplish certain tasks that previous were restricted to wizards.
+Also, since the BUILDER and IMMORTAL flags from previous patchlevels 
+are, intuitively, powers rather than real flag toggles, they were changed
+to powers in patchlevel 7.
+
+The powers include "teleport anywhere", "teleport anything", "examine
+anything", "boot", and most of the other useful wizard powers, save
+the ability to @force/control anything. Players who receive such
+powers should exercise them with the same caution a wizard should use,
+and they should not be given out lightly. A player granted all the
+powers has all the abilities of a ROYALTY, and more, except for the
+@rwall command.  Therefore, prudence should be exercised in granting
+special powers.
+
+
+8.2     Attribute ownership - @atrchown and @atrlock
+
+Attributes may be owned independently of objects. An unlocked 
+attribute can be changed by the owner of the object. A locked attribute 
+may only be changed by the owner of that attribute. Locked and unlocked 
+attributes are, for the purpose of triggers and similar evaluation, 
+exactly the same. 
+
+Only wizards may set attributes on things that they do not own. The
+most recent player to change an attribute is its owner. Please note that it
+does not do any harm for someone else to own one of your attributes. If the
+attribute is locked, however, you will not be able to remove it _even if you
+are a wizard. A wizard may, however, unlock the attribute and then remove it.
+
+In 1.50, two commands are used to handle attributes. @atrchown 
+changes the ownership. The syntax is @atrchown <object>/<attribute>=<new owner>
+@atrlock governs attribute locks: @atrlock <object>/<attribute>=<on or off>
+@atrlock <object>/<attribute> by itself returns the status of the lock.
+The 2.0 syntax (which also works in 1.50) is "@lock <object>/<attribute>",
+"@unlock <object>/<attribute>", and "@chown <object>/<attribute>=<player>".
+A normal "examine" shows the owner and lock status of attributes.
+
+
+8.3     Object ownership - @chown and @chownall
+
+The @chown command is somewhat different for wizards. A wizard may
+@chown any object he is carrying, or any object by dbref number. The syntax
+is @chown <object>=<player>. Not that *<player> is _not_ used in @chown.
+
+@chownall transfers the ownership of everything a player owns to
+another player. @chownall <player> transfers ownership to the wizard who
+executes this command. @chownall <player>=*<new owner> transfers ownership
+to another player. Note the use of the pointer. A @chownall should NEVER be
+done without the consent of both parties involved, since it is usually 
+difficult to reverse, especially if the recipient owns a lot of objects 
+himself.
+
+
+8.4     The queue - @ps and @allhalt
+
+Wizards can use @ps all to see the contents of the entire queue, or
+@ps *<player> to see the queue for one specific player.
+
+When the queue is very full, or a machine is looping so badly or
+triggering so many objects that simply halting it is not feasible, the 
+command @allhalt can be executed. This clears out the entire queue - player,
+object, and wait, and displays to all connected players the message, "Your 
+objects have been globally halted by <Wizard>."  @allhalt should be used 
+sparingly; if the server is slow, the queue may be full, but it may not 
+necessitate an @allhalt. In 2.0, this is "@halt/all" rather than "@allhalt".
+
+
+8.5      The database - @entrances, @find, @search, and @stats
+
+@entrances will work on "here" or on any room number, for a wizard.
+@stats can be broken down by player, using "@stats <player>"  Note the 
+absence of a pointer.
+
+Wizards need to be careful with @find, since @find with no arguments
+outputs the list of all objects that the wizard controls - i.e., the entire 
+database. @search with no arguments, however, only does a @search on the 
+wizard, printing out all the objects he owns. @search with any arguments,
+however, looks through the entire database, not just the wizard's objects.
+If you are looking for something, always try to do a @search instead of a
+@find, especially if you are on a 2.0 MUSH. @search which is restricted
+to a player is _considerably_ faster than @find.
+
+
+8.6      A note about security and privacy. DARK.
+
+Wizards have enormous power. No notes on a MUSH are private; a
+wizard can examine them. Wizards can set themselves DARK, disappearing from
+the WHO list. In 1.50, any actions taken by a dark wizard show up as 
+"Someone" rather than the wizard's name, if the game is so configured.
+Wizards cannot listen to whispers or pages, and always show up on a @sweep, 
+whether or not they are dark. A wizard owns everything; he can change, 
+destroy, or force it to do whatever he wants (unless it is God).
+
+Because of this, wizards must be VERY careful to make sure that 
+there are no programming loopholes in their objects which would enable the 
+objects to @force them to perform certain actions. 
+
+Wizards should also be careful to announce their presence, if they
+are entering a room and are DARK. There is virtually no justification for
+spying on a private conversation (the exception may be listening to two 
+players plotting how to crash the mud, or something similar).
+
+A wizard should _always_ check the location of a player before he
+teleports to that player. Being paged by a player does NOT mean that the 
+player presently wishes for company. In general, the wizard should also ask
+permission to enter the room. A wizard should also never teleport a player 
+anywhere without asking permission first - this is extremely rude.
+Occasionally, one tends to act before thinking, but a wizard should try to
+act with courtesy.
+
+Also, remember that in 2.0, wizards who exceed the idle time normally
+granted to mortals before an inactivity-timeout boot are set DARK.
+Wizards are also booted for inactivity, but can set their @timeout
+attribute to an arbitrarily high value; they will not be booted until
+that @timeout has expired. Wizards who are DARK from inactivity have a
+"d" next to their time instead of a "D", in the WHO list.
+
+In 1.50, wizards are never booted for inactivity. They are, however,
+set DARK at the mortal inactivity limit, if they are already set UNFINDABLE.
+
+If you are the sort of person who tends to forget that he is set DARK,
+you might want an automatic reminder given to you when you move. The
+following is useful for this:
+
+@move me=[switch(hasflag(%!,Dark),1,WARNING: You are set DARK.)]
+
+
+8.7      The Master Room and Command Processing
+
+In both 1.50 and 2.0, the command parser goes through the steps 
+shown here looking for a match on the command.  If it finds one at a 
+particular step, it stops and performs it.  If more than one match
+(say, multiple south exits from a room), one is picked at random.
+$-commands are an exception to this rule, in that ALL $-commands that match
+are executed, except that the master room is only checked for $-commands
+if none are matched in the check around the player.
+
+The 2.0 evaluation order:
+
+- Uppercase commands (WHO, QUIT, etc) if typed at a terminal.
+- Prefix-character commands (", :, ;, etc)
+- The 'home' command.
+- Exits in the current room.
+- Exits in the master room
+- Internal commands.
+- $-commands in the following places, all checked in parallel:
+   - Objects in your inventory.
+   - Objects in your current location.
+   - Your location (the room itself)
+   - You (optionally)
+- $-commands in the ZONE chain of the player's location
+- $-commands in the ZONE chain of the player himself
+- $-commands in the following places, all checked in parallel:
+   - Objects in the master room.
+   - The master room itself.
+
+The 1.50 evaluation order:
+
+- Uppercase commands (WHO, QUIT, etc) if typed at a terminal.
+- The 'home' command.
+- Prefix-character commands (", :, ;, etc)
+- Exits in the current room.
+- Internal commands.
+- Enter aliases on objects in the current room.
+- Leave aliases on the object you are in, if applicable.
+- $-commands in the following places, all checked in parallel:
+   - Objects in your current location.
+   - Your location (the room itself)
+   - Objects in your inventory.
+- If nothing has been matched:
+   - If the zone of the player's location is a parent room,
+- Parent room exits
+        - All $-commands on objects in the parent room
+   - Else,
+        - All $-commands on the zone object of the player's location
+- If still nothing has been matched:
+   - All $-commands on the player's personal zone
+- As a last resort, when matching still fails,
+   - Global exits (Master Room exits)
+   - All global $-commands ($-commands on objects in the Master Room)
+
+In both 1.50 and 2.0, the Master Room contains exits and commands
+which are global to the entire MUSH. This should be used with caution,
+as having a lot of global commands slow down the MUSH. Make sure
+something is really necessary before adding it to the Master Room. If
+it's only useful in some specific area of building, consider using a
+Zone instead (see the later section of this manual).
+
+Also, because it is necessary to check every attribute on every object
+in the Master Room for commands which don't match anything, the number
+of attributes on objects in the Master Room should be kept to an
+absolute minimum.  It is also a good idea to keep the number of
+objects in the Master Room down, since every object represents an
+additional UseLock which must be checked.  As a general rule of thumb,
+if an attribute doesn't contain a $command, it shouldn't be on a
+Master Room object. For convenience, some data attributes can be kept
+on Master Room objects, but this should be avoided whenever possible,
+even if the data attributes are set No_Command.
+
+Note that the parents of objects in the Master Room, and, in 2.2,
+parents of objects which are contained by a ZONE chain, are not
+checked for $commands. This allows you to place data attributes on
+the parent, for easy reference, thus leaving you with little excuse
+for ever having non-essential attributes on the object itself.
+
+
+9.  Wiz-specific commands
+
+9.1      Talking with other wizards
+
+MUSH code provides the commands @wizwall, @wizpose, and @wizemit.
+(In 2.0, these are @wall/wiz, @wall/wiz/pose, and @wall/wiz/emit). Note 
+that none of these use an = sign. @wizwall and @wizpose are really the same 
+command;  "@wizwall :<pose>" is equivalent to "@wizpose <pose>"  In the 
+case of @wizwall <message>, it is  "Broadcast: <Wizard> says, "<message>""  
+In the case of @wizwall :<pose> or @wizpose <pose>, the format is,
+"Broadcast: <Wizard> <pose>". @wizemit <message> shows the other wizards 
+"Broadcast [<Wizard>]: <message>"
+
+1.50 provides @rwall, @rwallpose, and @rwallemit. They work
+identically to the @wiz variants, except they send messages to both
+royalty and wizards, prefixed with "Admin:" instead of "Broadcast:".
+
+Only connected players may hear these messages.
+
+
+9.2      Public messages
+
+Wizards can shout using @wall <message>. There is no way of blocking
+out shouts; therefore, this should be used sparingly. It sends the
+message to every connected player.
+
+Wizards can set the Message of the Day using @motd <message>. The
+message stays up until another wizard resets it, or the MUSH goes down. The
+MOTD is shown to players when they connect, and when they use @listmotd.
+Wizards also have a @wizmotd, which is shown to all connecting wizards.
+For wizards, @listmotd displays all MOTD messages.
+
+2.0 refers to these commands as @motd, @motd/wizard, and @motd/list.
+
+
+9.3      Locking out players
+
+In certain situations, there may be a need to disable all non-wizard
+logins. 1.50 code provides the @login <on or off> command. When @login is 
+off, all player connections will be refused - after the welcome screen, the
+message set by using @rejectmotd <message> is displayed and the player is 
+disconnected.
+
+In 2.0, the command to use is "@enable logins" or "@disable logins".
+The @enable and @disable commands may be used to tweak other things as
+well; this is probably the most commonly used of the options. The message
+displayed to players who cannot connect may be set using @motd/down.
+
+
+9.4      Dealing with players
+
+There is no easy way to retrieve the lost password of a player.
+Therefore, it is simpler to simply use @newpassword <player>=<new password>.
+The player is informed that the wizard has changed his password. The player
+should then log in and change his password to something else that the wizard
+doesn't know. Never @newpassword a player without his knowledge, unless
+it's an emergency.
+
+@pcreate is a command which only works if the MUSH is compiled under
+registration. @preate <player>=<password>  creates a player with the name and
+password. You may not create two players with the same name.
+
+* * * * *
+
+@boot *<player> can be used to force a player to disconnect from the
+MUSH. This is the general punishment for being obnoxious, or for idling for
+too long. If you are @booting someone for idling, you should, in general, 
+page them with a warning five minutes before doing the @boot.
+
+@boot has another use -- killing off sessions of players who
+are unable to disconnect, due to network problems. Generally, in this
+case it is best to use "@boot/port", which allows you to boot a specific
+question. In 1.50, the wizard WHO shows descriptor numbers; in 2.0, you
+must use the SESSION command to get the descriptor number of a connection.
+"@boot/port <descriptor number>" then closes that specific connection.
+Players will often request to have "frozen", dead, connections @booted.
+
+In 1.50, players will be booted with a message notifying them that
+they have been booted off the game. In 2.0, players will also be told who
+booted them off, unless "@boot/quiet" is used, in which case the player
+will simply be abruptly disconnected without any kind of notification.
+
+* * * * *
+
+@toad turns a player into an ordinary object, called "A wart toad
+named <player>" (1.50), or "A slimy toad named <player>" (2.0) and @chowns 
+all his objects to the wizard doing the @toad. The player will be booted off 
+the game, prior to being turned into an object.
+
+@toad is actually somewhat redundant. @dest *player will @boot the
+player, @chown all his objects to the executing wizard, and @destroy the
+player itself. If possible, use this instead of @toad (TIM code and MUSE,
+however, may be somewhat different.)
+
+Be careful with @destroy #<dbref>. There is no check to see who the
+object belongs to or what it is - be _very_ certain that you have the right
+object number, or you may end up irretrievably blowing up an object which 
+represents hours of programming. There is no way to retrieve @destroyed 
+objects other than rooms (which may be set !GOING). 1.50 prevents this 
+somewhat by forcing wizards to use @nuke to destroy objects which do not 
+belong to them; please don't use @nuke as your standard command for
+destruction, or you'll defeat the purpose of this safeguard!
+
+The wizard command "slay" is a "kill" which always works. There's
+generally no reason to use it, unless programming a puzzle or something
+similar; all it does is give the player some money and send him home.
+
+
+9.5      Dumping the database
+
+The command @dump writes the database to disk. In 1.50, this can 
+take anywhere from a minute or two to half an hour - make sure not to do 
+overlapping @dumps. Overlapping dumps can cause crashes, incomplete database
+writes, and other assorted undesired effects.
+
+In 2.0, you don't generally need to worry about doing dumps, as the
+disk database is saved fairly often and loss from crashes tends to be
+minimal.
+
+The command "@shutdown" shuts down the MUSH. It first does a @dump,
+gives all connected players the name of the wizard who did the
+@shutdown, and the message "Going down - Bye", then drops all
+connections. Don't do this without a very good reason.
+
+Note: if you have database damage and are shutting down because the
+game will crash or doing something else equally nasty in a few
+moments, DON'T! The straight @shutdown will save the database and your
+damage will be permanent. In such a dire situation, you have two options:
+find the God (or other person with direct access to the MUSH account) and 
+have him "kill -9" the process, or do a "@shutdown/abort". This will cause
+the MUSH to dump core and die, allowing for the damage to be assessed later
+by someone skliled with a debugger.
+
+
+10.      Database control
+
+10.1     Quotas - limited object creation
+
+If quotas are turned on, the command @allquota <limit> displays the
+current quotas and objects owned by all players, and then resets their quotas
+to the new limit minus the number of objects they currently own.
+
+@quota <player> reports the number of objects a player owns, and
+his quota still available. @squota <player>=<limit> reports the number of
+objects the player owns and his remaining quota, and then sets his quota to
+<limit> minus the current number of objects he owns. If the limit is 0, then
+@squota works identically to @quota.
+
+
+10.2     Money control
+
+Wizards have unlimited money, and can freely give out money to 
+players using give *player=<money>. Wizards can also take away money from 
+players by giving them negative money. It is generally not a good idea to 
+give players vast amounts of money. The command @poor <money> resets the 
+money of every player on the MUSH to <money>. This command should be used 
+sparingly, if at all.
+
+
+10.3     Consistency checking
+
+The commands @purge and @dbck will probably not be used by most
+wizards. They check the database for corruption: @purge checks the destroyed
+object list and makes sure that all the objects on that list are really 
+there; @dbck forces the database to run an internal cleanup and consistency 
+check every ten minutes. @dbck automatically executes @purge.
+
+In 1.50, if, for some reason, your database is corrupted but the
+game is still up (usually through a bug in the internal compression routines),
+you will find that an attempt to dump the database will cause a segmentation
+fault and core dump (i.e. a nasty crash).  You can generally get a clean
+database write by using the "@dump/paranoid" command, which very thoroughly
+scans the database before writing it to disk, checking for non-printable
+characters and the like. Someone with access to the game's account should
+then log in, back up the paranoid dump, and then kill off the game process
+in some manner.
+
+2.0 provides the ability to do some database repair within the
+game. The first of the db repair commands is "@cut"; this cuts off the
+object or exit chain at the wizard's location by setting the "next" field
+of the object to NOTHING. The objects or exits beyond the cut retain
+their location, but are not accessible except via dbref number. 
+They can be pasted back into their proper places via the @fixdb command.
+This command allows you to more or less arbitrarily set the fields of
+an object -- the contents, exits, location, and next pointers, as well
+as the owner, value, and name. These commands are NOT to be used unless
+you are CERTAIN you know what you are doing, as it is possible (and indeed
+rather easy) to produce database inconsistencies/loops which can hang
+or crash the server.
+
+
+11.      Zones
+
+This section only applies to PennMUSH 1.50.  Please see a later section
+of this manual for a description of Zones in TinyMUSH 2.2.
+
+
+11.1     Object zones
+
+A Zone Object (or, alternatively, ZMO - Zone Master Object) is
+simply an object that other objects have their zones set to. Objects
+that have their zone field set to a ZMO are referred to as being in that
+ZMO's zone. There's nothing at all special about a zone object, aside from 
+that property.
+
+Anyone who passes the enter lock of a ZMO has control over objects
+in that zone. Someone who has control of an object via passing the enter
+lock on the ZMO can do many things that the object's real owner can do,
+including examining the object, changing its attributes, and setting flags
+on it. Two notable exceptions are the @chown and @destroy commands, which
+are reserved to the object's real owner. Also, players NEVER control other
+players.
+
+This control property of zones makes it possible for two or more
+people to work on a project together. A wizard is needed to @chzone a player
+to a zone; henceforth, everything that player builds is automatically part
+of that zone. The wizard-only @chzoneall command changes the zone of 
+everything a player owns. Wizards should not change the zone of a player
+without first obtaining the approval of all other players in that zone.
+
+For example, if I, Amberyl, wished to work on a project together
+with Annalyn and Tavella, I would @create an object (let's call it MyZone),
+and then "@elock MyZone=*Amberyl|*Annalyn|*Tavella". This would allow
+myself, Annalyn, and Tavella to control all objects in the zone.
+(PLEASE NOTE: wizards should never be in a zone with anyone! It's far too
+easy for a regular player to abuse an item belonging to that wizard).
+
+Players may @chzone their own objects to a ZMO that they own,
+or are in the enter lock of. It isn't necessary to be personally zoned
+to a ZMO in order to be able to control objects in it (the only criterion
+is the enter lock of the ZMO); it is perfectly possible to be zoned to
+something else (or Nothing), and @chzone the stuff you build to the
+desired zone.
+
+Zones have several other nifty features. First of all, $-commands
+on the ZMO are "global" to rooms that are part of that ZMO, and to things
+which are personally part of that ZMO. Also, objects can perform a
+"@zemit <zone> = <message>" to emit a message to all rooms in that
+zone. This command is computationally expensive and costs 100 coins, but
+it can be very useful if you have, for example, a space station which
+uses an intercom system for announcements.
+
+
+11.2     Parent room zones
+
+Parent rooms are a slightly more complex version of zones.
+The main difference is that, instead of the ZMO being a thing, the
+ZMO is a room. All information above about object zones also applies
+to parent rooms.
+
+Parent rooms have several more useful properties. First,
+a parent room is a bit like the Master Room. It is treated as "global"
+by objects which are zoned to it. If you are in a room zoned to a
+parent room, you can use exits in that parent room. You can also
+use $-commands defined on objects placed in the parent room.
+
+This essentially allows you to create small areas on the MUSH
+with their own local "global" commands and exits, without cluttering
+up the Master Room. Since local commands take precedence over global
+ones, you don't have to worry about global commands interfering with
+your local parent room ones.
+
+Unless you want to use parent room exits, you should use
+object zones. Object zones are faster, and cause less overhead for the
+server to worry about; this is an important consideration if the
+MUSH is big.
+
+11.3      ZoneMaster players
+
+One final type of zone control is possible, using a player with
+the ZONE flag set. Such players, called ZoneMasters, behave like ordinary
+players, but any object that they own is controlled by whomever passes
+the ZoneMaster's enter lock. For convenience, objects which pass the
+ZoneMaster's enter lock are referred to here as "zone controllers".
+
+Zone controllers are able to @chown objects to the ZoneMaster.
+However, such objects count against the original owner's quota, and the
+object's creation cost remains charged to the original owner, not to the
+ZoneMaster. This enables quotas to be set on individual players, while
+still allowing a "builder character" to own all the objects.
+
+
+The ZoneMaster is more secure than a ZMO, since INHERIT objects
+may be placed within the zone without any abnormal danger; since all
+objects within the zone have the same owner, there is no danger of having
+one's unzoned objects @forced through a security hole. Unlike a standard
+ZMO, however, the ZoneMaster does not act as a master object; $commands
+are not inherited off it. 
+
+Note that this is different from standard zoning in that the
+"zoned" objects are actually owned by the ZoneMaster; thus, it is possible
+to use @chzone to place the object in yet another zone, for the purpose
+of inherit $commands, and so forth.
+
+11.4      Local wizard control
+
+It is possible, through use of zones, to have "local wizards".
+This is accomplished by @chzone'ing all players that you want the
+local wiz to control, to a ZMO (or parent room; ZMO will be used in
+this discussion to refer to both). This ZMO should be @elock'ed to
+just that local wiz. That player will then have control over all objects
+created by players in that zone. Unlike a real wizard, however, he may
+not @force players.
+
+This may or may not be desirable, depending on your philosophy
+of administration (assuming you are a god). Local wizards have almost
+all the powers of normal wizards, without the accountability and expected
+responsibility of full wizards. Although certain systems, such as MUSE,
+have used player ranks in a way similar to local wizards, they do not
+give such complete control to non-wizard (or wizard-equivalent) players.
+
+It is the recommendation of this writer that local wizard
+control only be used if the MUSH is extremely large, and organized into
+big, but mostly self-contained, groups which require an administrator who
+must be able to control the objects of his underlings.
+
+
+12.       The Fundamental Laws of Wizarding
+
+
+The section below comes from a "lecture" that I've given new
+wizards on MUSHes that I'm a "senior" wizard on. I've had several requests
+for it in printed form, so it appears here, as kind of a summary to this
+section of the manual. It summarizes rules for wizard conduct, and gives
+a nutshell guide to wizard commands. The full lecture is available via
+ftp from the same site where you obtained this manual; it will probably
+be called "wiz-ethics" or something similar. All administrators are highly
+encouraged to read the full lecture; this manual only hits the highlights.
+
+
+12.1      Wizard Etiquette
+
+There are three things that players REALLY hate, and which
+generally constitute abuse of wizard powers. The first is @forcing a player
+to do something. There's really never a reason to do this. You can almost
+always duplicate the effect of a command that a player issues by just
+doing it yourself. Forcing a player to say or pose something is obviously
+unethical. Forcing a player's objects is also generally a bad idea.
+
+Always ask permission before @teleporting a player, or teleporting to
+a non-public location, even if the location is JUMP_OK. The first is
+just courtesy; the only reason to ever teleport a player is if he
+refuses to come of his own free will. It has the potential to mess up
+some command the player is trying to execute; waiting a moment or two
+for the player to come on his own isn't going to kill you. Following
+the second rule will prevent you from teleporting into potentially
+embarrassing situations. Just because someone is paging you doesn't
+mean that he necessarily wants to talk to you in person.
+
+Don't wander around DARK. If you're going to hang around dark because
+you don't want people bothering you, stay in one of your rooms.  If
+you encounter another player, announce your presence. The same thing
+applies to puppets who are DARK. Some people believe that the best way
+to handle player discipline is to teleport to their location, DARK,
+and spy on them. This is a breach of ethics, in most cases. Unless you
+believe that players are deliberately conspiring to destroy the MUSH,
+do not use DARK for anything other than hanging around without getting
+bothered by player pages.
+
+Two other brief points: don't examine private objects unless you need
+to, and ESPECIALLY, do not use wizard powers to take code or code
+segments without permission. In addition, never, ever, wiz while
+intoxicated!  Your judgement isn't steady, and you are also very
+likely to accidentally mistype a command and cause some sort of minor
+(or major) disaster.
+
+
+12.2       The Five-Step Method of Player Management
+
+If a player is behaving inappropriately, start with warnings and move
+up to more direct action. The exception are spammers and those who are
+being destructive towards the database; @boot and/or @destroy those
+players immediately.
+
+For players who are simply being obnoxious, breaking some of the MUSH
+rules, etc., page them and politely tell them that their behavior is
+unacceptable. If they don't respond to this "nice" warning within five
+or ten minutes, page them again with a more strongly worded warning.
+If they continue to misbehave, try a threat: "Do that one more time
+and you're going to be @booted."  The next thing to try, if the twink
+is being stubborn, is setting the twink GAG. Most people will
+disconnect of their own accord if they're gagged. For really
+obnoxious, stubborn people, you can then resort to @boot. If the twink
+returns, do a @newpassword. Note that if you are planning on doing a
+@newpassword to lock out a twink, you should @newpassword _before_ you
+@boot, since otherwise, the player can log right back in before you
+have a chance to type the @newpassword command.
+
+The reason for using @newpassword instead of @toad or @destroy is that
+@newpassword is reversible. You should never use @toad or @destroy on
+a player who owns stuff; that is a decision for God to make. Just do a
+@newpassword and send mail to the other wizards.
+           
+   Summary:
+      1. Nice warning
+      2. Not nice warning / threat
+      3. Gag
+      4. Boot
+      5. Newpassword
+
+
+12.3       When to use wiz commands
+
+@allhalt:  This is an emergency-only command. It will halt all commands on
+           all objects, and clears out the wait queue. If there are any 
+           objects which need to run continuously, this command should be
+           used as a last resort. Try to be considerate and retrigger objects
+           that need to run continuously, if you do an allhalt.
+@boot:     Never @boot without a good reason. If a player is on twice and
+           he can't kill one of his connections, he will generally page you
+           and ask for a @boot; don't do one unless he gives you permission.
+           The other use for @boot is detailed in the previous section.
+@chownall: Never, ever, do one of these without the explicit permissions of
+           both of the parties involved. It's not a bad idea to send mail
+           to God (or at least make sure he knows) if you do one of these.
+@dbck:     The @dbck command is used to force a database consistency check.
+           All GOING objects get recycled. Unless you know what you're
+           doing, there's no real point to doing one.
+@purge:    This checks the destroyed object list for corruption. It's
+           normally done as part of a @dbck.
+@dump:     In 1.x, you don't want to do overlapping dumps. If you don't
+           have FORK enabled, you want to shout before doing one, because
+           it will probably cause quite a bit of lag. Otherwise, @wizwall
+           that you're doing a dump, so the other wizards know not to do
+           one right after you do.
+@login:    You can turn MUSH logins on and off with this command. Unless
+           you've got some kind of emergency which necessitates locking out
+           all players, don't use this. More importantly, don't forget to
+           turn logins back on after the emergency is over.
+@daytime:  This turns on or off computationally expensive commands. God
+           generally makes the decision when these commands should be
+           enabled. Turning them off when they should be turned on probably
+           won't hurt anything, but turning them on when they need to be
+           off has the potential to get God very upset with you.
+           Only 1.50 has this command.
+@shutdown: In general, only wizards with access to the MUSH account should
+           do @shutdowns, so they can bring the MUSH back up afterwards.
+           The exception is if the MUSH is not autorestarted, and needs to
+           be taken down for a machine reboot or something similar.
+           If the database has somehow been corrupted, a @shutdown may or
+           may not be a good idea -- this command automatically does a
+           @dump, and you might be making your problem semi-permanent.
+           When in doubt, contact God; to shut down the game without doing
+           a @dump, use @shutdown/abort.
+
+
+The most important thing to remember: USE COMMON SENSE.
+
+------
+
+That's it for wizard commands and advice.
+Comments, corrections, and suggestions should be emailed to Amberyl,
+at lwl@netcom.com
+
+
+

@@ -1,0 +1,359 @@
+Class arms armour I
+Beleriand2 - Sunday, January 29, 2006, 8:59 PM
+----------------------------------------------
+
+Welcome to Middle-earth...
++----------------------------------------------------------------------------+
+Beleriand MUX Online Role Playing      _    These are the names of the Wizards
+J.R.R. Tolkien's             .-.  ^^  / \        _   ELENTARI MELKOR ULMO AULE
+First Age                   /   \    /^./\__   _/ \       MANDOS VAIRE ALDARON
+               _        .--'\/\_ \__/.      \ /    \  ^^  ___         and VANA
+Founded in    / \_    _/ ^      \/  __  :'   /\/\  /\  __/   \
+Feb 1995     /    \  /    .'   _/  /  \   ^ /    \/  \/ .`'\_/\      Please do
+            /\/\  /\/ :' __  ^/  ^/    `--./.'  ^  `-.\ _    _:\ _     not use
+WELCOME    /    \/  \  _/  \-' __/.' ^ _   \_   .'\   _/ \ .  __/ \    Tolkien
+HERE!    /\  .-   `._\/     \ / -.   _/ \ -. `_/   \ /    `._/  ^  \     names
+        /  `-.__ ^    \.-'.--'    . /    `--./ .-'  `-.  `-. `.  -  `.
+ ^^  __/__   ______  _ \     ______/ _____  /______'___\__  _  \   -__\__
+    (  __ \ (  ___ \( \ `--.(  ___ \(  __ \'\_   _/(  __  )( (  `/|(  _  \
+    | (__) )| (__ \/| (     | (__ \/| (__) )  ) (  | (__) ||  \ ( || ( \  )
+    |  __ ( |  __)  | |     |  __)  | __ ./   | |  |  __  || (\\) || |  ) |
+   /| )__) )| (___/\| (___/\| (___/\| ) \ \___) (__| )  ( || ) \  || (_/  )
+  /`|/ \__/.(______/(______/(______/|/. .\_/\_____/|/.. .\||/.. )_)(_____/.\
++----------------------------------------------------------------------------+
+   create <name> <password>   - to create a new character. Capitals matter!
+   connect <name> <password>  - to connect to your existing character.
+   connect Guest              - if you just wish to look around.
++----------------------------------------------------------------------------+
+
+**********************************************************************
+
+Type NEWS for game policy and world information. Please read NEWS CONDUCT.
+Type -HELP and HELP for commands; QUIT to quit; -WHO or WHO to see who is on.
+Visit our WWW home page:  http://beleriand.mux.net/ 
+
+                            Welcome to Beleriand!                             
+                   Come join in the fun of Tolkien's world!                   
+  For RP info please see the RPnews BB, the RPinfo BB, and your culture BB.    
+
+See -NEWS for more messages (last updated: Mar 15 2003).
+ 
+**********************************************************************
+Last connect was from dslb-084-061-126-080.pools.arcor-ip.net on Sun Jan 29 10:22:14 2006.
+School - Main Area
+You enter the school building, at first with a feeling of anxiety, but then you notice that this school is very much unlike all the other schools that you know. Here, students are happy to learn more about code and RP, and teachers are happy to work with their students. You feel the irresistible urge to increase your knowledge, and decide to check out the schedules for the lectures.
+Contents:
+Email-Signup-List
+Email Sign-Up List
+Obvious exits:
+Teacher's Room  Roleplaying School  Coding School  Out  
+Doing set.
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Anerulisse        IC  F  Elf       Feanorian    Nargothrond                1m 
+Vanetaure         IC  M  Elf       Feanorian    Nargothrond                7m 
+Ceowulf           IC  M  Man       Brethil      Brethil: Upon Amon Obel   31m 
+Dinaglar         OOC  M  Elf       Nargothrond  Hangout                    7m
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 5 players connected.                             Record players: 52
+[-Mail(#4343)->Glinirnaeth] 
+The following boards have new posts to them since Sun Jan 29 11:59:43 2006:
+
+No boards have new posts.
+[funcobj(#4577)->Glinirnaeth] MAIL: You have 66 messages in your inbox. (0 new, 0 marked for deletion)
+The last message to the Feanorian BB was posted on Jan 25
+
+Stop! You have more than 50 messages....PLEASE clear some of these out.
+
+[Queue Manager(#1000)->] Connected: Glinirnaeth 
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] System Clock shows: Sun Jan 29 12:12:47 2006
+
+Beleriand time is:
+Nighttime (About 5AM) on Hevensday of Winter - Yule 3, 472
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Anerulisse        IC  F  Elf       Feanorian    Nargothrond                2m 
+Vanetaure         IC  M  Elf       Feanorian    Nargothrond               46s 
+Ceowulf           IC  M  Man       Brethil      Brethil: Upon Amon Obel   36m 
+Dinaglar         OOC  M  Elf       Nargothrond  Hangout                   12m
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 5 players connected.                             Record players: 52
+<Public> Glinirnaeth scratches his head and thought there were some more people who intended to come...
+[-Mail(#4343)->Glinirnaeth] =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+                            Public Bulletin Board                            
+                                   7 posts                                   
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  1 ( 435) Jan 09  Glinirnaeth   Class on Arms and Armour
+  2 ( 367) Jan 15  Orodreth      Re: Class on Arms and Armour
+  3 ( 184) Jan 16  Beleg         Re: Class on Arms and Armour
+  4 ( 439) Jan 21  Glinirnaeth   Re: Re: Class on Arms and Armour
+  5 ( 286) Jan 22  Dinaglar      Re: Re: Re: Class on Arms and Armour
+  6 (  98) Jan 26  Beleg         Re: Re: Re: Class on Arms and Armour
+  7 (  75) Jan 27  Orodreth      Re: Re: Re: Class on Arms and Armour
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+[-Mail(#4343)->Glinirnaeth] =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Mail Mesg 7: #24731             Date: Fri Jan 27 04:13:22 2006
+From: Orodreth
+To: Public
+Subject: Re: Re: Re: Class on Arms and Armour
+Message:
+Noon to 1 PM of our current GT should work for me. :)
+
+-Rhif
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+<Public> Vanetaure says, "Hm?"
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] System Clock shows: Sun Jan 29 12:13:38 2006
+
+Beleriand time is:
+Nighttime (About 5AM) on Hevensday of Winter - Yule 3, 472
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] System Clock shows: Sun Jan 29 12:13:42 2006
+
+Beleriand time is:
+Nighttime (About 5AM) on Hevensday of Winter - Yule 3, 472
+<Public> Glinirnaeth says, "For class...."
+<Public> Vanetaure says, "Oh, right, that thing. I totally spaced on that."
+<Public> Glinirnaeth says, "Well, it is 12..."
+<Public> Vanetaure nods, and hadn't checked the clock on his computer recently.
+Player Name          On For   Idle  Teriyaki Chicken for Sale! Fresh!
+Glinirnaeth           00:08     0s  \\\\\\\\\\ Fall into the GAP //////////
+Anerulisse            00:32     5m  
+Vanetaure             01:45    17s  MacBeth!
+Ceowulf               02:23    40m  
+Dinaglar              04:13    16m  
+There are 5 players connected.
+Vanetaure pages: How long you think the class will go?
+You paged Vanetaure with 'Not sure, haven't done it yet in this form, an hour, an hour and a half?'.
+>From afar, Vanetaure nods.
+You paged Vanetaure with 'So, double check, it IS past the announced time, right???'.
+Vanetaure pages: Around noon to 1 is what you posted on Public.
+You paged Vanetaure with 'Yeah. That's now, right???'.
+Vanetaure pages: It's 12:17.
+Vanetaure pages: My time.
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] System Clock shows: Sun Jan 29 12:25:53 2006
+
+Beleriand time is:
+Nighttime (About 5AM) on Hevensday of Winter - Yule 3, 472
+Vanetaure pages: 12:25 according to -time.
+You paged Vanetaure with 'Yup'.
+<Public> Glinirnaeth says, "Well, who's interested in coming? If there's a few people, we might as well start. Otherwise, I'll reschedule"
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Anerulisse        IC  F  Elf       Feanorian    Nargothrond               41s 
+Vanetaure         IC  M  Elf       Feanorian    Nargothrond               56s
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 3 players connected.                             Record players: 52
+[Queue Manager(#1000)->] Connected: Minielin 
+Disconnected: Ceowulf   Dinaglar  
+<Feanorian> Glinirnaeth says, "Ah, well, only the two of you there..."
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Nuridhwen        OOC  F  Elf       Doriath      Doriath: Forest Region     1s 
+Minielin          IC  F  Elf       Doriath      The Caves of Menegroth    14s 
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Anerulisse        IC  F  Elf       Feanorian    Nargothrond                1m 
+Vanetaure         IC  M  Elf       Feanorian    Nargothrond                1s
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 5 players connected.                             Record players: 52
+<Feanorian> Glinirnaeth says, "Now two Doriathrim"
+[Queue Manager(#1000)->] Connected: Nuridhwen 
+Vanetaure pages: I should be able to make it at around 12:45 my time. That work for you?
+You paged Vanetaure with 'well, we'll wait till then and see who is there. Gormy wanted to come after all, and Orodreth, too. I have no problem starting in half an hour. I'd just loathe to start much later than that, because it will start getting late for me at the rear end of things.'.
+>From afar, Vanetaure nods. "Yeah... I know Gormy and that bum Orodreth wanted to come... wonder why they're not on... hm.
+[Queue Manager(#1000)->] Connected: Fanya 
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Fanya            OOC  F  Man       Brethil      Brethil: South of Teiglin 13m 
+Nuridhwen        OOC  F  Elf       Doriath      Doriath: Forest Region    22m 
+Minielin          IC  F  Elf       Doriath      The Caves of Menegroth    22m 
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Anerulisse        IC  F  Elf       Feanorian    Nargothrond                4s 
+Vanetaure        OOC  M  Elf       Feanorian    Nargothrond                7s
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 6 players connected.                             Record players: 52
+Vanetaure enters the school building, eager to learn.
+Vanetaure has arrived.
+<OOC> Vanetaure waves.
+You say, "Heh, this is an OOC area ;)"
+Huh?  (Type "help" for help.)
+You say, "No need to use <OOC> ;)"
+You say, "Anyways, I put some laundry into the machine, lets wait till 1 and then see"
+Vanetaure nods. "Heh. Just a habbit I'm used to." Nods. "Alrighty.
+<Feanorian> Anerulisse heads out briefly, to hopefully accomplish something
+<Feanorian> Vanetaure nods, and waves.
+[Queue Manager(#1000)->] Disconnected: Anerulisse  
+Glinirnaeth sighs
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Fanya            OOC  F  Man       Brethil      Brethil: South of Teiglin  9m 
+Nuridhwen        OOC  F  Elf       Doriath      Doriath: Forest Region    10m 
+Minielin          IC  F  Elf       Doriath      The Caves of Menegroth    38m 
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Vanetaure        OOC  M  Elf       Feanorian    Hangout: School           10m
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 5 players connected.                             Record players: 52
+Vanetaure nods.
+Glinirnaeth wonders if it makes sense to hold class for one person :P
+Vanetaure says, "Heh. Well, could always log it and send it to those interested..."
+You say, "Yeah, but it means fewer people asking questions"
+<Public> Glinirnaeth says, "Anyone else interested in today's class?"
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Fanya            OOC  F  Man       Brethil      Brethil: South of Teiglin 23m 
+Nuridhwen        OOC  F  Elf       Doriath      Doriath: Forest Region    24m 
+Minielin          IC  F  Elf       Doriath      The Caves of Menegroth    52m 
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Vanetaure        OOC  M  Elf       Feanorian    Hangout: School            1m
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 5 players connected.                             Record players: 52
+You say, "Bah, all idling anyway"
+Vanetaure nods.
+You say, "Well, ok, if you're interested, we can do it as sort of a rehearsal, feel free to interrupt at any time and ask questions. At least I can incorporate them if and when I hold the class again"
+Vanetaure nods.
+You say, "I have to start, though, with the caveat that while I am going to talk about arms and armor in the first age, I believe I don't know anything about what they were like -and still I think that what I say is useful for the MUSH. Why's that?"
+You say, "Well, if we look at a scene in LotR, we read:"
+You say, "Boromir had a long sword, in fashion like Anduril but of less lineage and he bore also a shield and his war-horn."
+You say, "So Boromir's sword was "in fashion like Anduril". Yet at least Narsil was forged thousands of years earlier. Yet Elendil still used Narsil in the Battle of the Last Alliance."
+You say, "Are we to take this that there is no development whatsoever of military technology across the ages?"
+You say, "I think not."
+You say, "I think it we have to remind ourselves that what Tolkien was writing was mythology. And if we look, say at Malory's Morte Darthur, or at medieval psalters and Bibles, the figures displayed or described therein are contemporary to the author. I believe that Tolkien mirrored that technique, though of course not using contemporary technology, but technology contemporary to a time he saw fit."
+You say, "So, what I am trying to say is that while we have a description of arms and armour in Middle-Earth in the First Age, that is not necessarily, how arms and armour "were" in the fictious past of Middle-Earth from a Fourth Age point of view. However, given that we want to recreate the books, I think it is perfectly fine to use the information as is. More, it enables us furthermore to use the information in LotR."
+Vanetaure nods.
+You say, "Let's start with one of the most detailed items we actually have from a first-age background: The Dragon-Helm of Dor-Lomin. I'd like to use it to illustrate a bit how I am trying to put the information we have into a context and distill a "larger picture" out of individual items."
+Vanetaure nods.
+You say, "The Dragon-Helm is described as 'That helm was made of grey steel adorned with gold, and on it were graven runes of victory. A power was in it that guarded any who wore it from wound or death, for the sword that hewed it was broken, and the dart that smote it sprang aside. It was wrought by Telchar, the smith of Nogrod, whose works were renowned. It had a visor (after the manner of those that the Dwarves used in their forges for the shielding of their eyes), and the face of one that wore it struck fear into the hearts of all beholders, but was itself guarded from dart and fire. Upon its crest was set in defiance a gilded image of the head of Glaurung the dragon; for it had been made soon after he first issued from the gates Morgoth. '"
+You say, "It was, of course, originally made for a dwarf, and the masked helmets are mentioned also in the description of the Dwarves fighting the dragon on the battlefield."
+Vanetaure nods.
+[Queue Manager(#1000)->] Connected: Telriel 
+[Queue Manager(#1000)->] Connected: Lindeita 
+You say, "We can find such helmets in another work intimately connected with Tolkien. I'll cite a few exemplary passages: 
+
+Whence ferry you plated shields,
+steel-hued shirts of mail and masked-helms,
+this host of army-shafts? 
+
+...
+
+And the helmet hard, /all haughty with gold, 
+shall part from its plating. /Polishers sleep who 
+could brighten and burnish / the battle-mask; 
+and those weeds of war /that were wont to brave 
+over bicker of shields /the bite of steel"
+You say, "In the same source, it it said of these helmets several times they were adorned with boar-figures, for example "boar-figures shone atop cheekguards adorned with gold;""
+You say, "This source, of course, is the epic Beowulf"
+You say, "But for the helmets described, there is a striking real peace that fits the descriptions remarkably well: The famous helmet of Sutton Hoo, which can be seen for example at http://www.heorot.dk/suttonhoo-grimhelm.jpg"
+<OOC> Vanetaure nods.
+You say, "Other boar-adorned helmets without a mask can be seen at http://www.heorot.dk/beo-guide.html#eofor"
+You say, "If we imagine, for example, the reinforced crest in the Sutton Hoo helmet being shaped in the likeness of Glaurung, and the scenes of battle the helmet is adorned with being replaced with those "runes of victory", I believe we would have a pretty good image of what the dragon helm might have looked like."
+You say, "As for a complete warrior, there is an image rendition of the king buried at Sutton Hoo at http://www.wuffings.co.uk/WuffMapLinks/RedwaldFrm.html"
+Vanetaure nods. "Nifty, that.
+You say, "Now the sword here is a type that the Romans, adopting it from the Celts, spread across western Europe and further spread by their successor states, the Spatha type. Now the Spatha is a one-handed sword. Yet including in the lines about Boromir's sword, we constantly read of "long swords"."
+[Queue Manager(#1000)->] Disconnected: Minielin  
+You say, "The late medieval longsword, however, contrary to roleplaying legend, is a weapon that is practically exclusively used two-handed. It is not used together with a shield, as Boromir or Theoden use their "long swords", nor with an off-hand weapon, as the Witch King does. However, the term "longsword" is modern anyway. At the time of these weapons, they were also called "long swords" -because they were longer than those previously in use. Now the spatha type is a longer weapon than the original roman infantry weapon, the Gladius. It is also, at least in its early medieval incarnations, longer than the Longseax, a sword-like one-edged version of the seax. And indeed, when referring to those times, many historians and archaeologists refer to the Spatha as a "longsword" -for it was, compared to the other types."
+You say, "In Carolingian times, noblemen were required by law to carry both "spathum et semispathum", a sword and a "halfsword". Why's that? The infantry exclusively used the seax as a stabbing-sword from close shield-wall formation. The cavalry however, used the Spatha, for cuts from horseback. The noblemen were required to serve in both functions, and thus were equipped for both duties."
+You say, "This is remarkably similar to the equipment that we read of in "Disaster of the Gladden Fields" among Numenoreans: They have weapons longer than those of the orcs, including long swords. But they also have a short stabbing sword, called the eket, no doubt the same type of sword the Hobbits later find in the Barrow-Downs. In one draft of a scene of Pippin presenting his sword to Denethor, the latter even called the blade a seax, though this was apparently dropped, no doubt because the description of the blades does not sound like a seax at all."
+You say, "However, short stabbing blades are found time and again, including among orcs, in Tolkien's writings to Middle-Earth."
+<OOC> Vanetaure nods.
+[Time Controller(#40)->Glinirnaeth] The sun rises over the horizon in the distance, illuminating Arda once again.
+[Queue Manager(#1000)->] Disconnected: Nuridhwen  
+You say, "The Numenoreans, though, used practically no cavalry at all, so their use of long swords is somewhat inconsistent, especially given that they also used very close formations. Tolkien even describes shield walls, that can be closed to squares or circles, as well as shield wedges, something the romans didn't really use, but well-known among, for example, the Vikings, who called it "svinfylka" -the pig-formation."
+You say, "But let's go back to the first age, and look at the Edain a bit."
+Vanetaure nods. "Well, the Numenoreans were taller, so wouldn't they have to use longer swords?
+You say, "Well, yes and no. Of course, the proper length of the sword depends on the man. But why have two differently-sized swords? And why one explicitly labeled for stabbing? It suggests the other was also used for cutting, which is great to do if you're in single combat, but pretty dangerous for your comrades if you are in formation, except for very small cuts from the wrist or elbow, which are easier done with a shorter blade."
+Vanetaure says, "Well, the a longer blade could be used for both cutting and stabbing (if made right). The eket could've been a backup weapon, or used when there wasn't room for the Numenoreans to use their longer blades. That's how I see it, anyways."
+Glinirnaeth nods. Could be. Of Hurin, we read in the Silmarillion: 
+
+Last of all Hrin stood alone. Then he cast aside his shield, and wielded an axe two-handed; and it is sung that the axe smoked in the black blood of the troll-guard of Gothmog until it withered, and each time that he slew Hurin cried: 'Aure entuluva! Day shall come again!
+Vanetaure nods.
+You say, "So, we see two things here: He used a shield first, so presumably, he also had a weapon to go with it. He subsequently wielded an axe two-handed. This is remarkably similar to this figure: http://www.regia.org/images/Bayuxc14.jpg of the Bayeux tapestry. A warrior with a scabbard at his side, a shield at his feet, wielding one of the great "danish" axes in both hands. While there were "two-handed" axes in later times, these were really pole arms. Of the Huscarls established among the Anglo-Saxons by scandinavian conquerors, it is known that they had both a sword (they were required by King Cnut/Canute to have one to join the Huscarls) and the great axe. At his feet here is the tapered "Norman" form of a shield, in contrast to the round shield used by the guy in the background. We will meet this difference again in a moment."
+Vanetaure nods.
+You say, "For the moment, as some more illustrations, here's a seax from the river Thames, http://www.heorot.dk/seax-rune.jpg and here: you can see (and buy :P ) some replica of spatha-type swords through the ages, including the Sutton Hoo sword, and here is an article on the development of swords in Britain from the bronze age to the viking age: http://www.vikingsword.com/smithy/seax.html"
+You say, "Let's get to another prominent human: Tuor. In the Silmarillion, we see only a brief description of the arms he finds in Nevrast, left there by Turgon: 
+
+Thus he came at length to the deserted halls of Vinyamar beneath Mount Taras, and he entered in, and found there the shield and hauberk, and the sword and helm, that Turgon had left there by the command of Ulmo long before; and he arrayed himself in those arms, and went down to the shore"
+You say, "This, however, already shows us again a sword/shield combination, and the use of a hauberk, which is a coat of mail. Coincidentally, this would again be pretty close to the norman figures on the Bayeux tapestry. The similarities don't end there, however, if we look at a more detailed description in the HoME: 
+
+Tuor marvelling saw that on the wall behind the throne were hung a shield and a great hauberk, and a helm and a long sword in a sheath. The hauberk shone as it were wrought of silver untarnished, and the sunbeam gilded it with sparks of gold. But the shield was of a shape strange to Tuor's eyes, for it was long and tapering; and its field was blue, in the midst of which was wrought an emblem of a white swan's wing. Then Tuor spoke, and his voice rang as a challenge in the roof: "By this token I will take these arms unto myself, and upon myself whatsoever doom they bear." And he lifted down the shield and found it light and wieldy beyond his guess; for it was wrought, it seemed, of wood, but overlaid by the craft of Elven-smiths with plates of metal, strong yet thin a foil, whereby it had been preserved from worm and weather."
+You say, "As I announced, here we have again the long, tapering form of the shield. More, it is unusual to Tuor's eyes, suggesting that maybe, from his time among the Easterling occupiers, he was mainly familiar with the round shield type."
+Vanetaure nods.
+You say, "I think it would not be far-fetched to say that those humans who worked with and were vassals of the Noldor had access to military technology that both the Easterlings in Morgoth's services and the roaming bands of Brigands later on would not necessarily have, or at least could not maintain. Though given that the Noldor brought their horses from Valinor, I would assume the Edain to have a closer focus on infantry."
+You say, "Given that we now have a good introduction to the weapons of the Noldor, let's look for a moment at how they got to make such equipment. Interestingly, they did not learn the craft from Aule:"
+Vanetaure nods.
+You say, "And when Melkor saw that these lies were smouldering, and that pride and anger were awake among the Noldor, he spoke to them concerning weapons; and in that time the Noldor began the smithying of swords and axes and spears. Shields also they made displaying the tokens of many houses and kindreds that vied one with another; and these only they wore abroad, and of other weapons they did not speak, for each believed that he alone had received the warning. And Feanor made a secret forge, of which not even Melkor was aware; and there he tempered fell swords for himself and for his sons, and made tall helms with plumes of red. Bitterly did Mahtan rue the day when he taught to the husband of Nerdanel all the lore of metalwork that he had learned of Aule."
+Vanetaure nods.
+You say, "Again, we see the combination of swords and shields, and also spears. This is pretty much a standard combination that in the real world has prevailed quite a while."
+You say, "And if we look at Fingolfin's fight with Morgoth, both of the fighters were using shields -even the Vala!"
+Vanetaure nods.
+You say, "There is in the oldest stories a description of the host of Gondolin, in which every house fights with different weapons. I think these are too old to really be reliable, but one quote I find interesting: "Egalmoth was their chieftain, and wore a blue mantle upon which the stars were broidered in crystal, and his sword was bent -- now none else of the Noldoli bore curved swords -- yet he trusted rather to the bow, and shot therewith further than any among that host.""
+You say, "So most of these swords should indeed be the simple, straight sword type. Scimitars are usually associated with orcs, as in the Narn i Hin Hurin: 
+There hard his life, and hurts he lacked not, 
+the wounds of shaft and the wavering sheen 
+ of the sickle scimitars, the swords of Hell, 
+the bloodfain blades on black anvils 
+in Angband smithied, yet ever he smote 
+unfey, fearless, and his fate kept him."
+Vanetaure nods.
+You say, "And in fact, there is even one drawing by Tolkien himself, now labeled Fangorn Forest, but originally meant to depict Beleg in Taur nu Fuin, in which a figure is clearly carrying a straight sword."
+You say, "Both the blades of the hobbits, and in the older stories the blades of the Noldor are described as having serpentine, intertwining patterns, as being damascened. This mirrors the many blades in the Sagas described just the same, and in fact, the mythic qualities of damascened blades were deemed so strong that later on, when better metallurgy was available, a damascened pattern was sometimes put on almost like veneer on solid steel cores. "Damascened" in this context refers to so-called pattern, welding, the process being explained here: http://www.vikingsword.com/serpent.html"
+Vanetaure nods.
+You say, "Let's go on to the Sindar: At the least at the beginning, they were equipped by the dwarves: 
+
+At this time therefore the Sindar were well-armed, and they drove off an creatures of evil, and had peace again; but Thingol's armouries were stored with axes and with spears and swords, and tall helms, and long coats of bright mail; for the hauberks of the Dwarves were so fashioned that they rusted not but shone ever as if they were new-burnished. And that proved well for Thingol in the time that was to come."
+You say, "This looks remarkably similar to what the Noldor head, suggesting that indeed, there is a common pattern. And again we see hauberks, coats of mail. In fact, if for a moment we take the Hobbit into the equation -due to its history not quite unproblematic, the dwarves of the Iron Hills there are described as shod in mail hose, something described as their secret and apparently knew and unknown to the rest of the people. So, indeed I think we can assume the type of armor to be pre-mail-hose in general."
+Vanetaure nods.
+You say, "With this, and the Dragon-Helm, I think we covered the dwarves as well pretty decently, though perhaps we should, having already pointed at the Hobbit, mention that the dwarves there are also described as having some type of war mattock, or pick."
+Vanetaure nods.
+You say, "Often, the vambraces of Prince Imrahil in LotR are mentioned as an alleged evidence of late medieval armor. That is, however, a misconception. As an example, in eastern Europe, the Khasars and their allies, through persian influences, already had a lot of armor for the extremities. Unfortunately, the best site to show that is currently unavailable. These were as far back as the 9th century, and the technology later carried over to the Rus, the early russians, which were shaped into realms by Swedish emigrants. Here: http://photofile.ru/image.php?id=2424802 is an example of a reproduction of a high medieval vambrace."
+Vanetaure nods.
+You say, "But is this not a bit an exotic area? Not really. There is the Hervararsaga, which includes the song of the battle of the Huns and Goths. They live close to each other, on the plains of the Dniepr, separated by "Mirkwood". The saga also includes a riddle-game closely resembling the one between Gollum and Bilbo. What's more, it was the topic of Christopher Tolkien's bachelor thesis, and he is the author of a prominent english translation."
+You say, "So I want to briefly touch the orcs, though for these, there is practically exclusively material from LotR"
+Vanetaure nods.
+You say, "In RotK, we read "Over the tunic went a coat of stout ring-mail, short for a full sized orc, too long for Frodo and heavy. About it he clasped a belt, at which there hung a short sheath holding a broad-bladed stabbing-sword. Sam had brought several orc-helmets. One of them fitted Frodo well enough, a black cap with iron rim, and iron hoops covered with leather upon which the evil Eye was painted in red above the beaklike nose-guard.`Now you're ready! You can pick up a shield as we go."
+You say, "And in TT, we read "Quickly they searched the bodies of the Orcs, gathering their swords and cloven helms and shields into a heap." and "There were four goblin-soldiers of greater stature, swart, slant-eyed, with thick legs and large hands. They were armed with short broad-bladed swords, not with the curved scimitars usual with Orcs: and they had bows of yew, in length and shape like the bows of Men. Upon their shields they bore a strange device: a small white hand in the centre of a black field; on the front of their iron helms was set an S-rune, wrought of some white metal""
+You say, "So the Orcs, too, used shields, and either broad-bladed stabbing swords or scimitars."
+You say, "They wore ring-mail, and at another occasion in HoME, Tolkien writes of crude mail produced in Isengard."
+Vanetaure nods.
+[Queue Manager(#1000)->] Disconnected: Fanya  
+[Queue Manager(#1000)->] Disconnected: Lindeita  
+You say, "I think all of this matches a pretty consistent pattern describing a technology level set between the mythical times of Beowulf, which could be assumed to be around 500AD, to the Norman invasion, or perhaps the First Crusade. I believe that Tolkien integrated a lot of the mythical material he worked with, from Beowulf to maybe the Chansons the Geste such as the Song of Roland. (In fact, the title "Lord of the Rings" is lifted straight out of Beowulf, where it is used in a different context. Tolkien quite often stumbled upon phrases such as "Misty Mountains" or "Mirkwood" and developed them further. It could very well be that the same is true for "Lord of the Rings", used in Beowulf for the same in his characteristic as bearer of a mail coat)"
+Vanetaure nods.
+You say, "So if we assume that equipment in Middle-Earth be along that time-frame, I think we can establish a pretty consistent picture. I'd put the Noldor at the more modern end of that frame, and in terms of style the Dwarves and humans inasmuch as they don't have Noldor support at the early end. I believe that rather than showing quality of work through advanced technology, Tolkien illustrates it by either mythical material, such as mithril, or by using technologies with quasi-mythical properties, such as damascened blades, for blades for which it was not historically used -both the roman gladius and the germanic seax were mostly made from better iron, not really from pattern-welded steel."
+You say, "As for those who'd like to give elves a more exotic feel, that is still perfectly possible:"
+You say, "As I already mentioned, the people of the Russian plains had a lot of oriental influences which made their way into armor design. And if we look at Feanor making "tall helmets with plumes of red", those who wish could well assume the Noldor to look like these warriors: http://www.varvar.ru/arhiv/slovo/images/rus8.jpg and http://www.varvar.ru/arhiv/slovo/images/rus4.jpg"
+Vanetaure nods.
+You say, "Well, that's about it, any more questions? ;)"
+Vanetaure says, "Heh. Not too particuarly."
+You say, "What do you think of the arguments presented? :)"
+Vanetaure nods. "Pretty god ones. Informative.
+[Queue Manager(#1000)->] Connected: Anerulisse 
+[Queue Manager(#1000)->] Disconnected: Anerulisse  
+You say, "Ah, the site with the Khasar armor has just become available again: http://www.geocities.com/normlaw/khazararms/"
+[Queue Manager(#1000)->] Connected: Dinaglar 
+Disconnected: Telriel  
+Vanetaure says, "Says it's down.."
+You say, "Strange, I can reach it :P"
+Vanetaure shrugs.
+You say, "Ah, now it's out again... weird"
+Vanetaure nods. "Indeed.
+You say, "Anyways, I could have brought a lot more quotes, but it was long enough as it was, and I left out most of the LotR stuff."
+[Global Commands (with WIZ-bit)(#71)->Glinirnaeth] ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Name            Mode Sex Race      Culture      Location                 Idle
+------------------------------------------------------------------------------
+Dinaglar         OOC  M  Elf       Nargothrond  Nargothrond                2m 
+Glinirnaeth      OOC  M  Elf       Feanorian    Hangout: School            0s 
+Vanetaure        OOC  M  Elf       Feanorian    Hangout: School            1m
+==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+There are 3 players connected.                             Record players: 52
+Vanetaure chuckles, and nods.
+You say, "I better be off to bed now, have to get up early."
+Vanetaure nods. "Alrighty. Did you log, or you want me to just copy it all for reference if you do it again?

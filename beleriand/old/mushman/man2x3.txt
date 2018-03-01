@@ -1,0 +1,1049 @@
+MUSH Manual Version 2.008:
+   Copyright 1993, 1994, 1995, Lydia Leong (lwl@netcom.com / Amberyl)
+   Last revised 5/22/95.
+
+Section III: Programming Applications
+
+5. Vehicle programming
+ 5.1  Entering and leaving objects: @enter, @aenter, @oenter, @oxenter,
+      @leave, @aleave, @oleave, @oxleave
+ 5.2  Inside vehicles: @idesc, @listen, relays, and commands, @remit, 
+      AUDIBLE, @prefix, @filter, @forwardlist
+ 5.3  Do it!  --  Wagon controller
+6. Complex programming
+ 6.1  Useful functions: 
+         General use: NUM(), LOC(), NEARBY()
+         List creation: LCON(), LEXITS(), LATTR(), LWHO()
+         Parsing: POS(), FIRST(), REST(), STRLEN(), MID(), WORDS()
+         Matching: EXTRACT(), MATCH(), MEMBER(), UCSTR(), LCSTR(), CAPSTR()
+ 6.2  Non-standard attributes: & and attribute flags
+ 6.3  Introduction to @dolist
+ 6.4  Time synchronization: semaphores, complex @wait, @notify, @drain
+ 6.5  Security problems in programming, INHERIT, ESCAPE(), SECURE(),
+         @fsay, @femit, @fpose
+ 6.6  Debugging: PUPPET and VERBOSE
+ 6.7  On the New Programming Style
+ 6.8  Hints and tips
+7. MUSH Programming: QuickStart Guide
+ 7.1  Basic syntax
+ 7.2  Conditional and loop constructs
+ 7.3  Functions
+
+
+5. Vehicle programming
+
+5.1   Entering and leaving objects
+
+Objects can be used as containers if they are set ENTER_OK. You can
+enter an object by typing "enter <object>" and exit an object by typing
+"leave". You may enter any object that you own or is set ENTER_OK, and,
+in 1.50, that you pass the enter lock of.
+
+You may set EALIAS and LALIAS attributes on objects. The string in
+these two aliases may be used as a substitute for "enter <object>" and
+"leave".
+
+Entering an object triggers the messages @enter, @oenter, @oxenter, and
+@aenter. The player who enters is shown the @enter message. The others inside
+the object see the @oenter message. People in the room that the player just
+left (which may not necessarily be the same room that the object is in, if
+the object is @tel'ed to) see the @oxenter message. @aenter is the action
+list to be executed.
+
+Leaving an object triggers the @leave, @oleave, @oxleave, and @aleave
+messages. @leave is shown to the leaving player, @oleave is shown to the
+things inside the object the player just left, @oxleave is shown to the 
+things in the room the player goes to (not the room that the container object
+is in  - if the player teleports or goes home, for example, the @oxleave
+message is shown at the player's destination). @aleave is the action list
+to be executed.
+
+========================
+[ Example 5.1:  Wagon ]
+[ This creates the most basic of container objects ]
+> @create Wagon
+Wagon created as object #953
+> @enter wagon=You climb into the wagon.
+Set.
+> @oenter wagon=climbs up into this wagon.
+Set.
+> @oxenter wagon=climbs up into the wagon.
+Set.
+> @leave wagon=You climb down from the wagon.
+Set.
+> @oleave wagon=climbs off this wagon.
+Set.
+> @oxleave wagon=climbs off the wagon.
+Set.
+> @set wagon=enter_ok
+Set.
+========================
+
+
+5.2   Inside objects: internal descriptions, echoing, and relays
+
+An object's internal description - the description displayed to those
+inside it - can be set using @idesc <object>=<description>. This functions
+identically to @desc, except it is only visible by those inside.
+
+To enable those inside the object to hear what is going on outside, set
+the @listen of the container to *. Anything that is in the object's @listen
+match will be relayed to the occupants.
+
+Talking and posing within objects is identical to talking and posing in
+rooms. Unless there is some sort of relay set up (described below), only those
+inside the object can hear you. 
+
+* * * * *
+
+It is frequently useful to be able to talk to the outside world, and
+perform other actions, like looking at the room that the object is in. This
+is best done with user-defined commands on an object which is placed inside
+the container object. It's a bad idea to define the commands directly on the
+container, since they can be used by those who are outside the object.
+
+The simplest way to handle looking outside is to do a user-defined
+command which forces the object to do a "look".  This is extremely inelegant,
+though. On MUSHes which provide it (all 1.50 and most 2.0), the command
+"look/outside" will allow you to look outside the container you are in.
+
+Taking objects which are outside, however, generally requires a
+user-defined command which forces the object to do a 'get' or @teleport.
+
+* * * * *
+
+In the past:
+
+The simplest way of doing relays is to add special user-defined commands
+for say and pose which force the object to emit. When the object emits, both
+players inside and outside the object will hear the message.
+
+Another, more direct, way of talking to the outside world from the
+inside - actually, of showing a message to only those outside - is to
+use @emit/room. This outputs the message to the outermost container - the
+room that the wagon or similar object is in.
+
+* * * * *
+
+The 'best' way to relay information, however, is to use the AUDIBLE 
+flag. This flag essentially outputs text from one place to another, without
+danger of looping.
+
+When set on an object, anything "said" (posed, emitted, etc.) inside 
+the object will be broadcast to the object's location, prepended with the
+string "From <name of AUDIBLE object>,"  The AUDIBLE object does not receive
+its own propagated messages, nor does it bounce back things it hears via
+"@listen *" from the outside world.
+
+AUDIBLE exits "funnel" noise from their source room to their 
+destination room. In 1.50, the room itself must be set AUDIBLE, to activate
+AUDIBLE exits. The AUDIBLE exit propagates the message to the next room
+and no farther; if there are AUDIBLE exits in the next room, they do NOT
+pass the information on to their destinations. Messages channeled through
+AUDIBLE exits are prepended with, "From <name of AUDIBLE exit's source>,"
+(1.50) or "From a distance,"  (2.0).
+
+2.0 also provides an additional command, @forwardlist. This command,
+with the syntax "@forwardlist <object>=<space-separated list of dbrefs>",
+forwards all messages heard by <object> to every object in the list of
+dbrefs. <object> must have its AUDIBLE flag set.
+
+You can filter out messages by setting the @filter attribute with
+a (possibly wildcarded) pattern to suppress. For example, if you don't
+want "<name> has left." messages, "@filter <exit>=* has left.", and messages
+matching that pattern will not be propagated. You can have more than one
+pattern; they should be separated by commas.  (i.e., you can do:
+"@filter <exit>=* has left.,* has arrived." to suppress both arrival
+and departure messages). If the pattern contains a comma, the entire
+pattern should be enclosed in curly braces {} (just like in @switch).
+
+You can change the string prepended to propagated messages via
+the "@prefix" attribute on the AUDIBLE object. The game always puts a 
+space between the prefix and the propagated message. Generally, prefixes
+are of the format, "From Mnedranth's back,"  or  "In the gazebo,"  or
+the like -- something which indicates where the message is coming from.
+The game automatically prepends one if the @prefix attribute is not set.
+There are times when it is desirable to have no prefix prepended at all;
+in those cases, set the @prefix attribute to "\". 
+
+There is an additional refinement: @infilter and @inprefix.
+@infilter suppresses text that is normally sent to the object via @listen
+(usually "@listen *"). @inprefix will prefix text forwarded from the outside
+with a string. Normally, text forwarded via @listen is not prepended with
+anything.
+
+
+5.3   Do it!  --  Wagon controller
+
+This section assumes that you have created a wagon as described in
+example 5.1. Below, <#wagon> refers to the dbref number of that wagon, and
+<#cont> refers to the dbref number of the controller.
+
+Enter the following commands:
+
+@idesc <#wagon>=<description>
+@listen <#wagon>=*
+@create Wagon controller
+@lock control=me
+drop control
+
+Possibilities:
+
+This is the old way of doing things:
+@va <#cont>=$'*:@fo <#wagon>=@emit {On the wagon, %N says, "%0"}
+@vb <#cont>=$.*:@fo <#wagon>=@emit {On the wagon, %N %0}
+[ These two commands define ' and . as alternates to " and : inside the wagon.
+  They relay to the outside world, as well as to those inside the vehicle.
+  There is one major problem with this: because of the @listen, the players
+  inside the wagon hear exactly what the wagon hears, which is the message
+  "You emit: <whatever>"  This is ugly, but it's effective. ]
+@vc <#cont>=$view:@fo <#wagon>=l
+@vd <#cont>=$view *:@fo <#wagon>=l %0
+[ These two commands substitute for look. ]
+
+This is the new way of doing things:
+@set <#wagon>=AUDIBLE
+@prefix <#wagon>=On the wagon,
+[ There is no need for the view command; "look/outside" will suffice. ]
+
+@ve <#cont>=$snag *:@fo <#wagon>=get %0
+[ This command forces the wagon to get an object outside. ]
+
+
+6.    Complex programming
+
+6.1   Useful functions
+
+Often, you will want to build machines that accept input from players 
+only; the NUM() function is useful for checking whether or not something
+is a player. Simply evaluate: num(*%N), assuming that you are checking if
+the enactor is a player. The * forces %N to be evaluated as a player; if
+there is no player by that name, the function returns "#-1". The only case
+in which this trick with num(*%N) fails is if the enactor has the same
+name as a player.  You can also use the TYPE() function to see if an
+object is a player.
+
+* * * * *
+
+The LOC() function is useful for several things. If it is used to
+locate a player, it will return the number of the player's location, assuming
+that the player is not set UNFINDABLE. If it is used to locate an object
+that you control, it will return the number of its location. It will return
+#-1 if you try to locate an object you don't control. Used on an exit,
+LOC() will return the dbref number of the exit's destination (to get an
+exit's source, use the HOME() function). The LOC() function returns the
+drop-to of a room; usually, this is #-1.
+
+Related to the loc function is the %L substitution. This returns
+the location of the enactor. Since it requires the enactor to trigger
+off a command of some sort, however, it cannot replace the LOC() function,
+unless you just want LOC(%#).
+
+* * * * *
+
+The NEARBY() function tests if one object is near another. It is
+called with: nearby(obj1,obj2). For this function to work, you must control
+at least one of the objects, or be near one of them. Object1 is considered
+to be nearby Object2 if it is in the same location, if it is being carried
+by Object2, or it is carrying Object2. If the two objects are nearby, the
+function returns a 1; otherwise, it returns 0.
+
+* * * * *
+
+The MUSH functions you will use most often will probably be those
+which return names and dbrefs. But almost all of MUSH programming involves 
+the manipulation of lists - adding items, removing items, finding certain 
+items within, etc. Lists, for MUSH purposes, are generally defined as a
+list of space-separated of words. The first word in a list is 1.
+Strings, on the other hand, are composed of arbitrary characters. The
+first character in a string is 0. Lists are basically special types of
+strings. Everything in MUSH is eventually treated as a string.
+
+Several functions create lists: LCON(), LEXITS(), LATTR(), and LWHO() are
+perhaps the most frequently used of these. LCON() gives a list of the 
+dbref numbers of all objects in a room (including dark objects). LEXITS() 
+gives a list of the dbref numbers of all non-dark exits out of a room. 
+LATTR() gives a list of all attributes on an object. LWHO() gives a list
+of all non-dark connected players.
+
+* * * * *
+
+Several functions are useful for parsing lists. The POS() function,
+called with pos(string1,string2), returns the position number of string1
+in string2. If string1 is not in string2, the function returns #-1. 
+The first character is considered to be position 1. This function
+is particularly useful when checking flags on an object. For example, to
+check if an object is a puppet, check pos(p,flags(object))   If this returns
+anything but #-1, the object is a puppet.  (An easier way to do this is to 
+use the HASFLAG function: HASFLAG(object,puppet) will return 1 if the object 
+is a puppet).
+
+For parsing, FIRST() and REST() are useful. They return the "head"
+and the "tail" of a list, respectively, and are basically identical to
+the LISP functions CAR() and CDR(). The "head" of a list is the first
+word in that list; the "tail" of the list is everything else. There's
+also the useful LAST() function in TinyMUSH 2.2, which returns the last
+word in a list.
+
+The WORDS() function counts the number of words in a list. This is
+useful for a loop counter ("repeat this action until the counter variable
+is greater than the number of words in the list"), and for finding the
+last word in a list, which is done as follows:
+  Assuming that the list is in %0: extract(%0,words(%0),1)
+  This counts the number of words in the list, then uses extract to take a
+  one-word long list starting from that position - the last.
+(Of course, if you're programming in 2.2, you should just use the LAST()
+function instead of this somewhat-complicated extraction.)
+
+The STRLEN() function returns the length of an entire string (list).
+It is extremely useful when used in conjunction with the MID() function.
+The latter is called with: mid(string,position of first character,length)
+and returns a string of <length> characters starting from <position>.
+The first character in the string is numbered 0, not 1.
+Supposing you wish to return a string starting with its third character.
+You would use: mid(string,2,strlen(string))
+
+* * * * *
+
+The EXTRACT() function, mentioned above, called with
+extract(list,first,length), is used to pull out words from the middle
+of a list. "Length" is the number of words to be extracted, _not_ the
+number of letters.
+
+MATCH(), called with match(list,pattern), returns the number of the
+word where <pattern> first occurs. The first word in the list is numbered 1.
+If no match is found, the function will return 0. The pattern may be straight 
+text, or it may contained the wildcards * and ?. The MEMBER() function is 
+similar, except that it does not take wildcards, and is case-sensitive,
+so match(a B c d,b) will return 2, but member(a B c d,b) will return 0.
+
+The case-sensitivity of MEMBER() can be worked around using the 
+UCSTR(), LCSTR(), and CAPSTR() functions. These functions return a list with
+all letters capitalized, all letters in lowercase, or with the first letter
+of the first word of the list capitalized, respectively.
+
+EXTRACT() and MATCH() functions can be combined to match two lists:
+  Suppose you have two registers, va and vb. The first contains a list of first
+  names, and the second contains a list of last names. Given a first name, you
+  want to find the last name. Assume that the first name given as input is in
+  %0, and that it is in the va. Then, the matching last name will be:
+  extract(v(vb),match(%va,%0),1)
+  It uses the match() function to find the position of the name in the first
+  name list, then uses extract() to get the word in the corresponding position
+  on the last name list.
+
+There's a function which combines an EXTRACT() and MATCH(), called
+GRAB(). It takes the syntax "grab(list, wildcard)"; it finds the first
+element of the list which matches the wildcard, and returns that
+element. This is useful if you want to partial-match something, and
+then want to get its entire name. For example, the function call
+"grab(banana:yellow apple:red pear:green plum:purple, pear:*)" will
+return "pear:green".
+
+* * * * *
+
+There are two functions related to EXTRACT() and MATCH(), which operate
+on multiple elements of lists. They're called ELEMENTS() and MATCHALL().
+"matchall(list, wildcard)" will return the element numbers of all elements
+of the list which match. "extractall(list of words, list of numbers)"
+will return the elements of the list which correspond to the given list
+of numbers. These two functions can thus be combined to locate, and then
+grab, multiple elements of a list.
+
+The MATCHALL() function can be used in conjunction with WORDS() to 
+determine how many times a given word appears in a list, via
+"words(matchall(list, word))" -- MATCHALL() returns the list of
+element numbers which match, and the WORDS() counts them up.
+
+
+6.2   Non-standard attributes and attribute flags
+
+Non-standard attributes act much like V-attributes, except that they
+may be arbitrarily named, as long as the names do not conflict with the names
+of any existing attribute. Objects can have an unlimited number of attributes,
+thus freeing the programmer from the necessity of creating multiple objects
+to handle extremely complex programs.  Non-standard attributes are set using 
+one of two methods:
+  &<attribute name> <object>=<whatever>
+  @set <object>=<attribute name>:<whatever>
+1.50 also allows:  @_<attribute name> <object>=<whatever>
+
+These attributes may be accessed via the get() and v-functions,
+%-substitutions of the form %attrib do not work for user-named attributes,
+as they do with @va-@vz. In all other respects, however, user-named attributes
+behave like @va-@vz.
+
+* * * * *
+
+Non-standard attributes may be locked (prevented from being changed
+by anyone other than the person doing the locking, or a wizard), or 
+chowned separately of the object. The syntax for doing this is
+"@lock <object>/<attribute>"; "@unlock <object>/<attribute>" unlocks
+the attribute.
+
+Attributes can also have flags. These are set via the command
+"@set <object>/<attribute> = [!]<flag name>".  There are three flags
+which may be set. The VISUAL flag makes an attribute public; anyone
+can read it via the GET() function. The NO_COMMAND flag prevents an
+attribute from being checked for $-commands and ^-listens. The
+NO_INHERIT flag prevents an attribute from being inherited by the
+children of the object.
+
+When you examine something, a locked attribute will have a "+"
+sign next to it. Attributes such as LAST are owned and locked to God;
+mortals may not change them. VISUAL attributes will be marked with "v",
+NO_COMMAND attributes will be marked with "$", and NO_INHERIT attributes
+will be marked with "i". 
+
+Certain 1.50 configurations always give the dbref of an attribute's
+owner next to the attribute name; other configurations, and 2.0, only
+show the attribute owner's dbref is it's different from the object's owner.
+
+In 1.50, the ANSI_DISPLAY flag, when set on a player, will cause
+attribute names to be highlighted in boldface (if the player's terminal
+supports ANSI control sequences). This is useful if you are examining a 
+very large object, and need to be able to quickly and easily see where 
+the breaks between attributes are.
+
+* * * * *
+
+Non-standard attributes can make MUSH code much easier to read; it
+is also good practice to do a &purpose or &program register on the object
+which explains a little bit of the programming, for future reference.
+
+One useful thing about non-standard attributes is that they are very
+useful when programming objects which contain numbered registers - mail
+objects, bulletin boards, etc. Instead of going through the clumsy method
+of putting get(me/va) get(me/vb) get(me/vc) etc. in a register and using
+extract() to force an evaluation, you can directly set registers, like:
+@va object=$foo *=*:&r%0 me=%1
+@vb object=$bar *:@pemit %N=get(me/r%0)
+Note the use of the brackets within the get() to force register evaluation
+early. The two statements above allow you to set and retrieve numbered
+non-standard attributes.
+
+
+6.3   Introduction to @dolist
+
+One very useful command is @dolist <list>=<action>. It performs
+<action> for every item in the list, replacing the symbol "##" with a
+word from the list. For example, @dolist [lexits(here)]="[name(##)]
+will make you say the names of all exits in the room you are in.
+It can be used to multi-page: @dolist Culyn RosaLil Jellan = page ## = Hello!
+
+@dolist evaluates its arguments in order. So, for example,
+"@dolist Culyn RosaLil Jellan = page ## = Hello!"  would page Culyn,
+then RosaLil, then Jellan.
+
+@dolist can also become rather confused by @switch statements and
+semi-colons. It is best to enclose the entire <action> section of the
+@dolist with braces - @dolist <list> = { <action> } 
+This will prevent most errors.
+
+@dolist should replace most list-based loops. In the past, the
+following was an efficient implementation of the problem listed above:
+
+VA: $name-exits: @tr me/vb=[extract(lexits(here), 1, 1)], 1
+VB: @switch %1=>[words(lexits(here)],{},{"[name(%0)];
+     @tr me/vb=[extract(lexits(here), add(%1,1), 1)], [add(%1,1)]}
+(It might be more efficient, if there are a lot of exits, to set
+ @vc me=lexits(here) in the VA, but this is a small point).
+
+Now, all that's needed is:  VA: $name-exits: @dolist [lexits(here)]="[name(##)]
+
+Not only is this much cleaner, but it's considerably faster than
+the old method. Triggers take up quite a bit of time to execute, and
+@dolist is vastly more efficient.
+
+
+6.4   Time synchronization
+
+Semaphores are a very flexible tool for the synchronization of
+objects. In practical terms, they make sure things occur in a specified
+order, and prevent simultaneous actions from conflicting with each other.
+The name "semaphore" comes from the name for signal flags used on ships;
+in modern computer systems, semaphores are used to prevent sections of
+memory from being concurrently read from or written to by different
+processes. Indeed, one of the main purposes of semaphores in MUSH is
+preventing two things from attempting to change the same attribute at
+the same time. More generally, in MUSH, semaphores are good for two
+major things: preventing an already triggered object from being used again
+until it has finished the action list associated with that trigger, and
+preventing a command from being run until a certain other command has
+executed. It is, fortunately, not necessary to completely understand how
+semaphores work in order to use them.
+
+"Synchronized" actions are those which are correctly performed in
+some specified order. Semaphores effectively delay the execution of
+commands by queueing them up in the correct order, and preventing the
+execution of the next command before the previous command has finished,
+thus synchronizing the objects and actions. Every semaphore is associated 
+with a number, called the "semaphore count", which is the number of actions
+(or in the case of MUSH, action lists) it is trying to synchronizing.
+Such actions are also referred to as "pending", "blocking", or "waiting" on
+the semaphore.
+
+* * * * *
+
+In MUSH, this semaphore count is stored in the SEMAPHORE attribute.
+A semaphore which has no commands pending will have a count of 0. If
+the semaphore count is positive, the semaphore has that many actions 
+waiting on it. A negative semaphore count indicates that actions will not
+block on it; for example, a count of -3 indicates that the next three
+actions to wait on the semaphore will be immediately executed.
+(Computer science types: please note that this is the REVERSE of the
+convention generally used in operating systems theory!)
+
+Two operations are used to control a semaphore: wait, and notify.
+"Waiting" an action list on a semaphore puts those actions at the end
+of that semaphore's queue. Each time a semaphore is notified, the first
+action list on its queue is executed. Thus, an action which waits on
+a semaphore is delayed until the semaphore is notified. A command which
+is waiting for its associated semaphore to be notified is referred to
+as "blocked"; when its semaphore allows it to be executed, the command
+is then "unblocked."
+
+Eexecuting a wait on a semaphore increases its semaphore count by
+one, and executing a notify on a semaphore decreases the count by one. To
+execute a wait on a semaphore, use "@wait <semaphore>=<action>"; if
+<action> is a list of commands, it must be enclosed in curly braces.
+To notify a semaphore, use "@notify <semaphore>". Please note that the
+object that does the waiting executes the action; the semaphore is 
+simply a timing device. Thus, in MUSH, you can use objects you do not
+own as semaphores, if they are LINK_OK.
+
+Objects waiting on a semaphore run their actions on a first-come,
+first-served basis, If #2, #3, and #4 execute waits, in that order, on
+semaphore object #5, the first notify the semaphore receives will begin
+#2's action list. The next notify will execute #3's action list, and so
+on. In other words, notification of a semaphore just releases the FIRST
+object which waited on it. 
+
+It is possible to notify a semaphore repeatedly, by providing a
+numeric argument to @notify: "@notify <semaphore>=<times to notify>"
+If the number of times is not specified, the semaphore will be notified
+once. The semaphore executes the first <times> commands that were @waiting
+on it. As a reminder, if the semaphore is notified more times than it has 
+commands queued, the semaphore count will become negative and further 
+@waits dependent on that semaphore will be immediately executed, until the 
+semaphore count is zero. This normal @notify is shorthand for the default 
+switch, "@notify/first".
+
+If you want all waits pending on the semaphore to execute, use 
+"@notify/all <semaphore>". This will cause all the actions waiting on
+the semaphore to be executed, and resets the semaphore count to 0.
+The other method of clearing a semaphore is "@drain <semaphore>". This
+will reset the semaphore count to 0. Actions waiting on the semaphore
+are simply discarded. In 1.50, destroying an object automatically 
+executes a @drain on it.
+
+MUSH also allows for semaphore waits to have a timeout expiration.
+An object can use "@wait <semaphore>/<time in seconds>=<action>".
+If <semaphore> is notified before <time> passes, the action is executed
+and the semaphore count decreases by one, just as if a regular semaphore
+wait were done. If <time> passes, and the action is still blocked pending
+semaphore notification, it is executed anyway, and the semaphore count
+on the <semaphore> is decremented by one.
+
+* * * * *
+
+Most MUSH programmers will never use semaphores for anything more
+than basic synchronization. The most common form of this is preventing
+an action list associated with a trigger from being run while the action
+list from a prior trigger is still executing. This is especially 
+important for vending machine objects that need to work on a single
+item at a time. One way of preventing this is to use an attribute BUSY;
+a @switch at the beginning of trigger checking for this attribute will
+tell you if the object is already trying to execute something. This,
+however, can force the player to make repeated attempts to trigger the
+object. A better way to do this is to associate the entire action list
+of the trigger with a semaphore.
+
+Triggers for action lists are generally @a-actions like @apay,
+or user-defined commands, like $buy. We thus set up our wait in one
+of the following two forms:
+
+@apayment object = @wait me={ @@ list of actions @@; @notify me}
+&DO_COMMAND object =$command: @wait me={ @@ list of actions @@; @notify me}
+
+We also need to initialize the semaphore state; this is best done
+by "@startup object = @drain me; @notify me".  The @drain makes sure that
+we start with a clear semaphore. We need the @notify in the startup because
+we don't want the first action we trigger on the object to block. The
+semaphore state of the object should thus begin at -1. (When programming
+your object, please remember that the very first time you use it, you will
+have to @notify it.)
+
+In the above example, if someone tries to trigger the object before
+a prior trigger has completed, the action list will block. The last command
+in the prior action list is "@notify me"; this will clear the block, and
+allow the next action list to begin immediate execution. This simple
+technique is extremely useful for avoiding the headaches associated with
+preventing concurrent attribute updates.
+
+
+6.5   Security problems in programming
+
+Although, in MUSH 1.50 and 2.0, any object that you own cannot force 
+you, care should still be taken to make sure that objects are reasonable
+secure. Be extremely careful not to leave control objects lying around. 
+_Always_ lock them to yourself, since possessive get works in 2.0 code.
+get <person>'s <object> will enable someone to take any unlocked object that
+you are carrying. One simple check you can make is to put a @switch in all
+commands that checks to see that the triggering object is its owner:
+@switch %#=<Your dbref>,{action list},{@pemit %#=You're not my owner!}
+Another secure way of doing this is to use "@lock/use" to prevent anyone
+but those who pass the lock from triggering $-commands on the object.
+
+One common problem is carelessness with semi-colons. Unless enclosed by
+curly braces { }, commands like %0 can be extremely hazardous. For
+example, take the object Foo, with a @va of $foo *:@emit %0
+Type "foo bar" will force the object to emit bar. 
+
+Under old parsers, there's a nasty trick that can be done: 
+"foo bar;@destroy me" (or, for that matter, any other command). Foo will 
+emit bar, and then happily blow itself up. This, obviously, is a Bad Thing.
+The @va should be $foo *:@emit {%0}   This safely traps any semi-colons.
+Although this kind of trick shouldn't be (easily) possible to do under the 
+new parser, it should still be something to keep in mind and avoid if possible.
+
+* * * * *
+
+Other problems involve registers that are directly set to whatever
+someone types in; if this is a force, triggering the register will execute
+the command. There are many variations on this; the most common is the
+bulletin board-type object which has a command like "post <subject>=<message>"
+and sets attributes to the subject and message, perhaps like this:
+$post *=*: &SUBJ_[secs()] me={From %N: %0}; &MSG_[secs()] me={%1}
+
+Here, the SUBJ attribute is safe, since the "From" component
+prevents the placement of a $command into the attribute. The MSG, however,
+is subject to something like this: "post Problem=$foo: @emit Gotcha!"
+This would set something like MSG_746606174 to "$foo: @emit Gotcha!"
+thus allowing any player to type "foo" and force the bulletin board
+to @emit Gotcha!  This is, obviously, dangerous. This problem can
+be gotten around by setting MSG to "XX %1" or something similar, and
+using REST() to retrieve the message when it is needed. Never allow a
+player to directly set an attribute in such a manner, even for a moment!
+To do so is to invite trouble.
+
+			----------
+
+A great many problems can be taken care of under INHERIT. Only objects
+set INHERIT may force their owner. Objects that aren't INHERIT may not force
+objects that are. If a player is set INHERIT, all of his objects are
+considered to be INHERIT. This flag is reset in a @chown.
+
+In 2.0, INHERIT objects owned by wizards have wizard powers. Any object 
+with wizard powers may force anything else, regardless of its status. This 
+flag is most useful for wizards and people who own large, complex, publicly
+used systems, such as mail.
+
+Sometimes it's useful to be able to have a non-INHERIT object force
+one that is, for a single command or group of commands. Since the most common
+use of this is for say/pose/emit output, in 2.0, the commands @fsay, @femit, 
+and @fpose have been provided. These do the obvious. The only thing to note is
+that @fpose has a switch, @fpose/nospace, which does eliminates the space
+between the name of the object and its pose (making it equivalent to
+player ";"). 
+
+* * * * *
+
+There are two other notable techniques for getting around INHERIT
+restrictions. Frequently, you are going to want to have a non-INHERIT
+object trigger one that is; this is especially true if you are a wizard
+on a 2.0 MUSH and should not, for security reasons, set objects INHERIT
+unless they absolutely have to be. You can use LINK_OK as a "@trigger-ok"
+flag in 1.50, but this is not possible under 2.0. Therefore, there must
+be a kind of "message passing" used. 
+
+The first method is to uselock the object you want triggered (the
+"victim") to an auxiliary object inside it, and then have the non-INHERIT
+triggering object (the "actor") trigger the auxiliary, which then does
+something which matches a $command on the victim. In the following example,
+#88 is the auxiliary object.
+
+&DO_ACTION actor=$test *: @trigger #88/PROPAGATE=%0
+&PROPAGATE #88=do_it %0
+&ACTION victim=$do_it *: @dolist %0={@set ##=dark}
+@tel #88=victim
+@lock/use victim=#88
+
+* * * * *
+
+Unfortunately, the $command method is not very fast. A better
+method is to use ^-patterns, and uselock the victim to the actor to
+prevent spoofing. The victim should also be kept in a secure location
+where it's not going to "hear" anything accidentally. The actor
+@pemit's an action pattern to the victim, which acts on it.
+In the following example, #90 is the victim.
+
+&DO_ACTION actor=$test *:@pemit #90=TEST_PCODE %0
+&TEST_PCODE_LISTEN #90=^TEST_PCODE *: @dolist %0={@set ##=dark}
+@set #90=LISTENER  (or MONITOR, in 2.0)
+@lock/use #90=actor
+
+As long as you are careful to make sure that the victim doesn't hear
+anything other than the actor, and then only when appropriate, this
+is the best method for getting around INHERIT.
+
+
+* * * * *
+
+The SECURE() function returns a string with all semi-colons and
+braces {}  converted to spaces. This is useful if you want to prevent
+people from abusing your stuff via triggers and the like.
+
+The ESCAPE() function inserts the escape "\" character before
+all [ ], preventing the expression within from being evaluated - the string
+is returned exactly as typed. An escape character is also inserted before
+the first character of the string. The parser's handling of the escape
+character is reliable and consistent; another less reliable character
+which can act as an escape is the percent "%" character.
+
+
+6.7   Debugging
+
+One of the things that is sadly lacking from MUSH is an easy way
+to debug objects. One is often reduced to having an object say registers
+out loud, or setting the object PUPPET.
+
+If the object is PUPPET, you will see all the output from the commands
+it executes, such as "Set."  Unfortunately, in TinyMUSH 2.0, "Set." is
+used to acknowledge setting attributes, flags, and miscellaneous other
+things. Thus, puppet output can be rather useless (although an "I don't
+see that here." or "Huh?" or similar messages can be useful in notifying
+you of a typo).  1.50's output is a bit more informative; it will tell
+you which object is getting set, and differentiate between attribute
+sets and flag sets, enabling the PUPPET flag to be fairly useful for
+debugging purposes.
+
+* * * * *
+
+The VERBOSE flag has been provided for debugging purposes. It
+displays the commands getting executed, which is useful for checking
+evaluation order and the like.
+
+In 2.0, it displays all commands executed by the object to the 
+object's owner, in the format <object name>] <command>. The output can be 
+slightly messy, especially if @switches are involved. When it goes to 
+evaluate the switch, it will display the entire switch statement; it will 
+then show the entire branch of commands and then go to execute them.
+
+In 1.50, the VERBOSE flag displays all commands executed by the
+object to the object's owner, in the format <object dbref>] <command>.
+As with the 2.0 version of this flag, this is the command _before_ it has
+been interpreted by the parser. Placing a @force before the command
+_might_ be useful for _debugging purposes only_, since this will parse
+all the arguments, resulting in VERBOSE output which shows the final
+form of the arguments to the command.
+
+* * * * *
+
+In 1.50, there is a flag called DEBUG. Objects set DEBUG cause their
+owner to be notified of the results every call to the parser that that object
+makes. If used in conjunction with the VERBOSE flag, it can pinpoint
+precisely which expression is being evaluated to an undesirable quantity. The
+output is in the format <object dbref>! <unparsed string> => <parsed string>
+
+A similar flag, called TRACE, exists in 2.0. Its output, however, is in
+the format "<object name>(<dbref>)} '<unparsed string> -> '<parsed string>'
+
+* * * * *
+
+One interesting thing to note about @dolist is that it evaluates
+all switches on one "level" of command before executing the results of
+those switches.
+
+This is a quirk which is only affects the output of @dolist; in
+terms of execution order, @dolist simply repeats its command sequence on
+each item in the list, completing the command sequence for each item before
+beginning on the next.
+
+
+6.8   On the New Programming Style
+
+
+The power of MUSH has increased dramatically in the past six months.
+Things that used to be difficult or slow are now fairly easy to do, mostly
+through the addition of new commands and functions.
+
+The biggest advances are in MUSH's treat of list processing. It
+is now quite simple to take a list and perform a series of functions on
+it, via the function ITER() or the  1.50 command @map. These functions
+"map" another function onto each element of a list, returning a list.
+(The terminology comes from the LISP programming language).
+
+ITER() and @dolist both use the "##" token to signify replacement,
+so it is fairly difficult to easily combine the two.
+
+1.50's @map command maps a function onto a list, placing the
+new list into the MAPLIST attribute on the object executing the @map.
+This makes the parser somewhat more forgiving. @map can be thought of
+as a command version of the ITER() function provided by both MUSH
+versions. This command, however, is rather redundant and is likely to
+go away in future versions of 1.50; new programs should avoid its use.
+
+* * * * *
+
+Among the more useful complex list processing functions are
+SETUNION, SETINTER, and SETDIFF. These three functions return a sorted 
+list from two lists. SETUNION concatenates two lists, removing duplicates.
+SETINTER returns the elements that the two lists have in common. SETDIFF 
+returns the elements of the first list which are not in the second.
+
+The SWITCH() function also enables one to do the equivalent of
+@switch on a pattern, but instead of triggering an action, the SWITCH()
+function returns a string.
+
+The final major improvement is the U() function in 2.0 (also called
+UFUN() in 1.50. In 1.50, UFUN() also has a close relative, ZFUN()). This
+is a "user-defined function", which generally consists of a bunch of 
+functions in an attribute. The uses of U() are beyond the scope of
+this section; suffice to say that it allows one to pass arguments into
+a function of one's own devising, and get a string back in return.
+It is most often  used to break up complex evaluations into something more
+readable, or to make a commonly used sequence of functions easily accessable.
+This function is described in detail later in this manual.
+
+* * * * *
+
+The increasingly popular "switchless style" of programming
+eschews the actual @switch command in favor of using function evaluations
+to generate a word. The object is then @forced to execute the attribute 
+named that word, via the V() function.
+
+Concatenation is merely a matter of leaving out things such as square 
+brackets [] in the appropriate places. Under 1.50, the STRCAT() function can
+also be used to explicitly concatenate strings.
+
+A very simple example of "standard" style vs. switchless coding 
+follows. Let's suppose we want an object to respond with one of three 
+different, randomly selected, messages, when someone types something.
+
+Switchless style:
+&FOOBASE object=$foo: @emit [v(FOO[rand(3)])]
+&FOO0 object=Zero!
+&FOO1 object=One!
+&FOO2 object=Two!
+
+[ or, alternatively, you could put the @emit in each statement and leave
+  it out in the main one, if you wanted to execute more complex commands. ]
+
+
+A slightly more interesting example, although not one that is
+really any more complicated -- there is a "cat" object upon which you
+wish to place a "pet cat" command which will get the cat to respond
+with a random action:
+
+Standard style:
+&PET_CAT cat=$pet cat:@switch [rand(3)]=
+
+        0,@emit The cat purrs when %N pets her.,
+              1,@emit The kitty blinks at %N.,
+              2,@emit The cat arches her back and hisses at %N.
+
+Switchless style:
+&PET_CAT cat=$pet cat:@emit [s(v(PETMSG[rand(3)]))]
+&PETMSG0 cat=The cat purrs when %N pets her.
+&PETMSG1 cat=The kitty blinks at %N.
+&PETMSSG2 cat=The cat arches her back and hisses at %N.
+
+
+In this particular example, the "switchless" style is wasteful;
+it is more efficient (as well as simpler) to use a @switch.
+The switchless style is useful when you have a very complex function with
+many possible outcomes, or need to run one huge batch of commands at a time,
+and want to avoid use of multiple @triggers.
+
+The switchless style for objects like this, however, does make it
+quite easy to expand upon the basic object. For example, to add more
+responses to the cat, one merey has to change the "rand(3)" to, say,
+"rand(10)", and then add new PETMSG attributes. It is much more difficult
+to edit switches (plus, the switchless style is easier to read).
+
+Some caution should be exercised when programming complex objects in
+the switchless style. Because "switchless" programs often involve extremely
+large, complicated function, they can take quite a long time to evaluate. 
+Normally, in MUSH, commands are queued, so that no one object consumes a
+large chunk of time all at once. The switchless style more or less defeats
+that, forcing the game to focus all its time on evaluating that one
+monster function. This can contribute to server lag. One should thus
+save switchless programming for those objects that really require the
+speed provided by the switchless style.
+
+Do note that it is presently trendy to brag that a given program uses
+no @switches (or SWITCH()es, or whatever the unpopular function of the
+week happens to be). One should be careful to always choose the method
+which is actually faster, rather than the method which seems the most
+impressive. Incomprehensible MUSHcode is poorly-written MUSHcode, usually.
+
+* * * * *
+
+Further notes on the parser:  while it is quite consistent in 
+evaluation, many programmers continue to question exactly what is needed
+to accomplish certain types of evaluations.
+
+The '\' character is an escape character. When placed in front of
+a "special" character (like brackets or percent signs), it prevents them
+from being evaluated. Each escape character delays evaluation for one
+pass through the parser.
+
+The '%' character is most often used for "percent substitutions":
+%N, %r, %va, etc.  When it is not being used for that purpose, though,
+it, too, acts like an escape character.
+
+The curly braces {}  are used to group commands. Also, in "weird"
+functions which cause a second pass through the parser (such as ITER())
+the curly braces are used to delimit functions that should not be 
+evaluated on the first pass through the interpreter.
+
+The square brackets [] signal the start and end of a function
+evaluation group. They can be nested, and for the purposes of concatenation
+show where "normal" text ends and substitutions begin.  Square brackets
+say, "Evaluate me now."  If you put square brackets into something like
+a call to ITER(), you will need to escape them out.
+
+Note that functions such as ITER() and U() are _exceptions_ to
+the parser rules; because they call the interpreter again, the behavior
+of the special characters sometimes seems strange. Successfully getting
+ITER() to return the correct value depends on careful use of curly braces
+and escape characters.
+
+For further details on complex programming in this style, as well
+as notes on efficiency and further parser details, consult the final 
+sections of this manual.
+
+
+6.9   Hints and tips
+
+This is by no means a complete guide to MUSH. The code is constantly
+changing, and new features are constantly being implemented. There are far
+more commands and functions available than can be covered in a manual like
+this one. If you are interested in MUSH programming, you should read through
+all the help files, on @-commands, functions, and flags.
+
+The best way to learn how to program MUSH is to do it! Find some sort
+of project and work at it. If you come up with something really neat, I'd
+love to hear about it - I'm especially interested in unique applications of
+non-standard attributes. Besides, I like getting mail.
+
+The non-standard attributes available in TinyMUSH make
+certain ways of doing things obsolete. Most notable is the use of extract()
+and member() combined with a list containing va-vz to access the va-vz
+attributes in numerical order; attributes can now be numbered a1-a10, for
+example. Also, worrying about running out of registers is now a thing of
+the past.
+
+Corrections, complaints, or congratulations are always welcome;
+I can be found as Amberyl on most MU*s, or emailed at lwl@netcom.com
+
+
+7.    QuickStart Guide
+
+7.1   Basic Syntax
+
+This section is really separate from the rest of the manual. It
+assumes that the reader is familiar with some other programming language,
+and simply wishes to learn how to get started in MUSH as quickly as 
+possible. Such users will still benefit from reading the rest of the 
+manual, since there are many programming applications in MUSH that don't
+really match anything one would do in another language; this brief section
+is simply intended to explain concepts in a slightly more compact,
+"traditional" computer-science fashion.
+
+Like most programming languages, MUSH has variables. There are
+temporary and permanent variables. Temporary variables are transitory,
+and are not saved in the database. They include the stack variables
+%0-%9, the enactor %# and related variables (the enactor name, %N, and
+the associated pronouns, %s, %o, and %p), the local registers r(0) - r(9),
+and so forth. Permanent variables are stored in attributes, and can be
+referenced by various functions which fetch variables. The most common
+of these are the V() function, which fetches an attribute off the current
+object, and GET(), which fetches an attribute off an arbitrary object.
+
+Attributes are divided into two categories, normally called
+"built-in" and "user-defined". Built-in attributes are set with the
+command "@<attribute name> <object>=<text>". User-defined attributes
+are set with the command "&<attribute name> <object>=<text>". You can
+set a built-in attribute using the user-defined syntax, but convention
+normally dictates the use of '@' for built-ins.
+
+The majority of built-in commands also being with '@', although
+some, such as "page", do not. Conventionally, MUSHcoded global commands
+begin with '+'. All commands are interpreted at runtime. Normally, the
+'=' sign is used to separate the main two arguments to a command. If
+there are multiple components to the second argument, these components
+are separated by commas. Curly braces are used to indicate groupings,
+and prevent interpretation of special characters enclosed within. The
+escape character '\' can also be used to protect special characters.
+
+ MUSH is a scripting language, essentially. Most MUSH objects'
+"programs" either output text or change the database in some way. The
+generally accepted way to handle complex tasks is by manipulating lists
+or strings in some manner. Everything in MUSH is eventually treated as
+a string, and there is no system of types. Functional programming is
+at the heart of most complex MUSH items; MUSH inherits a few LISP
+constructs such as FOLD and SETQ.
+
+
+7.2    Conditional and Loop Constructs
+
+
+There is no IF-THEN-ELSE construct in MUSH. Instead, there is
+a command called @switch, which takes the format:
+
+@switch <variable>=<condition1>,<action1>,
+                   <condition2>,<action2>, ...
+                   <conditionN>,<actionN>, <default>
+
+This is equivalent to the SWITCH-CASE construct in languages such as C
+and Pascal. Wildcard patterns are allowed in both the variable and the
+conditions, thus making this a fairly powerful construct.
+
+MUSH also lacks an equivalent of the FOR and WHILE constructs.
+Unfortunately, this type of structure is much more difficult to duplicate
+in MUSH. The closest is equivalent is the command @dolist, with syntax
+@dolist <list>=<action>, which performs an action repeatedly, substituting
+an element of <list> for the token '##' within <action>, each time.
+Thus, if you wanted to @create five items named 1, 2, 3, 4, and 5, you
+would try: @dolist 1 2 3 4 5 = @create ##
+
+
+FOR constructs in most programming languages typically perform
+a sequence of commands for some list of numbers, which might or might not
+be sequentially, but are mathematically related in some relatively simple
+fashion. The MUSH function LNUM() generates a list of numbers 0 to N.
+This list can then be manipulated via a function called ITER().
+
+It is important to remember that because the language is list-oriented,
+manipulating lists generally turns out to be the most efficient way of coding
+something. Good MUSHcode generally puts a minimal number of actual action
+commands on the queue. Trying to write MUSH with the same type of logic
+you would use in C or a similar procedural language is generally a mistake.
+
+
+7.3	Functions
+
+There are many, many functions in MUSH. Numeric manipulation, string
+manipulation, list manipulation, and functions to extract information from
+the database form the heart of the MUSH programming language. The important
+thing to remember here is that data in MUSH is untyped, and therefore, 
+functions may be used to perform transformations on data types that one
+would normally not think of as useful for a particular type of data.
+Truncating a floating-point number, for example, can be as simple as
+taking X characters after the '.' of the number (which is simply a string).
+There are, however, MUSH functions to perform a variety of complex tasks;
+the above task can be done with TRUNC() or ROUND(), for example.
+
+Functions take a fairly traditional parameter-format, with the
+syntax: FUNCTION-NAME(<arg 1>, <arg 2>, <arg 3>, <arg N>)
+Parameters are normally evaluated left to right, before the relevant
+outer function is called; in general, the innermost functions are the
+first to be evaluated.
+
+
+INDEX OF SECTION III EXAMPLES:
+
+5.1  Wagon
+5.3  Wagon controller

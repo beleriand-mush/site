@@ -1,0 +1,928 @@
+MUSH Manual Version 2.008:
+   Copyright 1993, 1994, 1995, Lydia Leong (lwl@netcom.com / Amberyl)
+   Last revised 5/22/95.
+
+Section II: Building and an introduction to programming
+
+Table of Contents:
+
+3. Building.
+ 3.1  Creating a room: @dig, FLOATING flag
+ 3.2  Connecting rooms: @open, @link and @unlink, LINK_OK flag, @entrances
+ 3.3  Refinements: ABODE and JUMP_OK flags, drop-tos and STICKY flag on rooms
+ 3.4  Exit conventions and the TRANSPARENT flag
+ 3.5  Do it!   --  home
+4. Introduction to Programming
+ 4.1  The stack and string substitutions - % substitutions
+ 4.2  General attributes and action lists - @trigger and GET()
+ 4.3  The queue: @ps, @wait, and @halt. HALT flag
+ 4.4  Decision making: @switch
+ 4.5  Other ways of triggering: @use and @startup
+ 4.6  User-defined commands: $command, @scan, @verb
+ 4.7  Introduction to functions: ADD() and other math, RAND(), TIME()
+ 4.8  Do it!  --  falcon control
+
+
+3. Building
+
+3.1   Creating a room
+
+Building a room is done quite simply, using the @dig command. The syntax
+is: @dig <Room name>=<in1;in2;in3;etc>,<out1;out2;out3;etc>
+
+in1, in2, and in3 are all exit "aliases" - typing any one of these names will
+bring you through the exit into the room. You may have as many of these as
+you wish; the names must be separated by semi-colons. in1 will be the visible
+"primary" exit name, which appears in the room's Obvious Exits list.
+out1, out2, and out3 are similar. This exit goes from the room you just dug
+to the room that you are in.
+
+On TinyMUDs, building convention dictates that exits be set DARK - i.e.
+no exit names appear in the "Obvious Exits" list. Many people like visible
+exits, however, and in the age of MUSHes, most exits are visible. Visible
+exits are the default.
+
+You must control the room that you are @digging from. If you don't
+own a room, you should first @dig <Room name> and then @tel to that room.
+(Or use @dig/teleport, which builds the room then moves you there).
+You can then build off that room. If your room is not linked to something,
+however, you will occasionally get the message "You own a disconnected room,
+<Room name>."  To avoid this, set the room FLOATING.
+
+
+=============================
+[ Example 3.1: Living Room ]
+> l
+Foyer(#3108R)
+This is the foyer of a small private home.
+Obvious exits:
+Doorway
+> @dig Living Room=Living Room;lr;living,Foyer;f;out;o
+Living Room created with room number #3813.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+> l
+Foyer(#3108R)
+This is the foyer of a small private home.
+Obvious exits:
+Living Room  Doorway
+> lr
+Living Room(#3813R)
+Obvious exits:
+Foyer
+=============================
+
+
+3.2   Connecting rooms
+
+To open an exit between two existing rooms, use the syntax
+@open <in1;in2;in3;etc>=#<room>,<out1;out2;out3;etc>   This will open and
+link exits between the two rooms. You can also open an exit in but not
+out by simply using @open <in1;in2;in3;etc>=#room
+
+To change an exit destination, simply "@link <exit>=#<new room>".
+(Certain older versions of MUSH might require you to first "@unlink exit".)
+
+Be careful not to leave exits unlinked, because an unlinked exit will become
+the property of whomever @links it. If you want to have an exit going no place,
+like something called "sit" which displays the @fail message "You sit down."
+@link the exit to the room it is in - i.e. @open sit=here. @lock sit=#0.
+@fail sit=You sit down.
+
+You can let people open/link exits to one of your rooms by setting it
+LINK_OK. Note that people cannot open an exit from your room into something
+else; they can only link an entrance.
+
+* * * * *
+
+The "@entrances <object>" command returns all links to <object> -- 
+exits which are linked to the object, rooms which have their drop-tos set 
+to the object, and players and things which have their homes set to the 
+object. This command in 1.50 also takes switches, allowing you to specify 
+exits, rooms, players, or things alone. This command is computationally
+expensive, costing the same as @find.
+
+You can limit the dbref range which @entrances searches by  specifying
+"@entrances <object>=<first object>,<last object>". This is similar to
+restricting the range on @find.
+
+
+3.3   Refinements
+
+If you want people to be able to @teleport to your room, set it
+JUMP_OK. Beware - if you are in a JUMP_OK room and someone does a @whereis
+on you, the room number will be listed, and that person will be able to
+@tel to your location, so if you don't want unexpected visitors dropping
+in, it might be best not to set the room JUMP_OK.
+
+If you want other people to be able to set their homes in your room -
+i.e. be sent there automatically when they type 'home' - set the room ABODE.
+To set yourself or another object's home, @link <thing>=<here/#room>.
+
+In older versions of MUSH code, most notably MicroMUSH, the JUMP_OK
+and ABODE flags are merged; a room set ABODE may both be @linked to and
+@teleported to.
+
+* * * * *
+
+Rooms may be @linked to other rooms, using @link <room1>=#<room2>.
+This sets a "drop-to". Objects dropped in room1 will automatically be sent
+to room2. "Drop-tos" may be delayed by setting the STICKY flag on room1.
+If the room is STICKY, the drop-to will not be performed until the last
+player has left the room.
+
+
+3.4   Exit conventions
+
+There are certain exit conventions used on TinyM*s which make following
+other players around easier. Exits should, if possible, have an @osucc and
+@odrop message. The @osucc message is triggered when someone uses an exit;
+it is displayed to everyone else in the room that the person just left. 
+The @odrop message is triggered the same way, but is displayed to everyone
+in the room that the person enters. Thus, you can tell where people are
+going to, and where they are coming from.
+
+For purely aesthetic purposes, exits often have @desc and @succ messages.
+The @desc message is displayed when someone "looks" at an exit; the @succ
+message is displayed to the person who walks through the exit.
+
+* * * * *
+
+Several clever things can be done with "null" exits. These are exits
+that don't lead anywhere, but simply display a message to the player. For
+example, an exit named "sit" could give the message "You sit down." These
+exits are usually locked to #0, linked to the room they are in, and DARK.
+Use of these kinds of exits is generally discouraged on MUSHes that enforce
+building quotas and/or are trying to conserve disk space.
+
+In areas that use a lot of directions - north/south/east/west etc. - it
+is often helpful to have a null exit with the names of the remaining directions
+in it. For example, if a room has exits in all directions except east and
+west, a null exit called east;e;west;w with a @fail message of "You can't
+go that way."  is very helpful. Otherwise, the player who types "east" will
+simply get a "Huh?  (Type "help" for help.)" message.   Before you make such
+fake exits in your rooms, though, it might be a good idea to check that your
+MUSH doesn't have them already defined in the Master Room.
+
+MudCore provides the Master Room support for these fake direction
+exits (and the message "There is no exit in that direction.")  MudCore
+takes this a step further, however, providing customization of these
+fake exits without taking up more database space for extra "real"
+exits. Sometimes, when building an area, you will want to have, for
+example, a "north" exit which provides a message like, "You walk down
+a long corridor, discover nothing interesting, and return to where you
+started."  and doesn't actually lead to another room. Such exits give
+the illusion of "space", making a small area feel larger. In MudCore,
+"fake" exits in the cardinal directions can be designed by placing the
+attributes DESC_<direction> and FAIL_<direction> on the room. For the
+above example, one might use, "&DESC_NORTH here=To the north is a
+long, featureless corridor." and "&FAIL_NORTH here=You walk down a
+long, corridor, discover nothing interesting, and return to where you
+started."
+
+* * * * *
+
+There is a flag called TRANSPARENT, which can be set on exits. If this
+flag is set, players looking at the exit see, after the exit description,
+the description of the next room and its contents (but not its succ/fail
+messages or exits). This is useful for creating the illusion of an archway
+or similar portal, where it makes logical sense to be able to look through
+it into the next room.
+
+In 1.50, the TRANSPARENT flag can also be set on rooms. This causes
+the obvious exits in the room to be displayed with each exit on a line
+by itself, giving the destination room. For example, you might have:
+
+   Obvious exits:
+    South leads to Foyer of the Bank.
+    East leads to Intersection of Park and Hill Streets.
+
+instead of:
+
+   Obvious exits:
+   South  East
+
+
+3.5   Do it!  --  home
+
+This builds a very simple home of three rooms, linked in a triangle:
+
+              Living Room
+                |       \
+            Workroom------Bedroom
+
+Issue the following commands:
+@dig/teleport Living Room
+[ The room will be dug and you will be moved into it. Note its dbref number ]
+@set here=FLOATING
+[ Suppresses disconnected room warnings ]
+@desc here=<whatever the room looks like>
+@dig Workroom=Workroom;w;work;south;s,Living Room;lr;living;north;n;out;o
+go workroom
+@desc here=<whatever the room looks like>
+@dig Bedroom=Bedroom;b;east;e;bed,Workroom;w;work;west
+go bedroom
+@desc here=<whatever the room looks like>
+@open Living Room;lr;living;northwest;nw;out;o=#<xxx>,Bedroom;b;bed;
+ southeast;se  
+[ Note: the previous line is wrapped-around. <xxx> is the room number of the
+  Living Room, which you should have noted earlier. ]
+@set here=ABODE
+@link me=here
+[ Sets your home to this bedroom ]
+
+All three rooms are dug and linked - now, all you have to do is to spiffy
+up the exits, and you're all set!
+
+
+4. Introduction to Programming
+
+4.1   The Stack and string substitutions
+
+The MUSH stores several variables, related to the cause of an action,
+the object that is executing an action, and the program state during that
+action, referred to as the "stack". These are accessed via a "percent
+substitution".
+
+One such variable is the "enactor" -- the object which caused an
+action to be performed. For example, if Sareena looks at a Plush Shaav 
+Doll, Sareena is the enactor. The enactor is sometimes referred to as the
+"cause". The percent substitution '%N' returns the name of the enactor; in 
+this case, it would be "Sareena". The substitution '%n' also returns the
+name of the enactor, but the first letter is in lower-case. Another 
+substitution, '%#', returns the dbref number of the enactor.
+
+It is also possible to get the appropriate pronoun for the enactor.
+'%s' is the subjective pronoun (he/she/it). '%o' is the objective pronoun
+(him/her/it). '%p' is the possessive pronoun (his/hers/its). The capital
+letter forms ('%S', etc.) return the pronoun with the first letter 
+capitalized. The game determines the pronoun to use by looking the @sex
+attribute on the enactor. These substitutions are equivalent to the
+function evaluations "SUBJ(%#)", "OBJ(%#)", and "POSS(%#)".  In the
+example above, since Sareena is female, these substitutions would return
+"she", "her", and "hers", respectively.
+
+The substitution %l returns the dbref number of the enactor's
+location. This is useful when programming objects in the Master Room,
+and does not pose a "security risk", since the enactor has volunteered 
+his position by triggering a $command or similar.
+
+The object performing the action can be referenced via '%!'. This
+returns the dbref number of the object. It is equivalent to the function
+evaluation "NUM(me)". In the above example, the object that has been
+triggered (and thus is performing the action) is the Plush Shaav Doll.
+
+* * * * *
+
+The "stack" in MUSH is simply a place where strings are stored; it
+is not a literal "stack" in the usual sense of having a top object which
+can be pushed and popped (as in MUF, or as defined in a standard computer
+science class). The stack consists of ten strings, numbered 0 through 9.
+Strings on the stack are referred to as %0, %1, %2, and so on, through %9.
+The mechanisms for copying strings into the stack will be explained later.
+
+Related to "percent" substitution is the V() function. It produces
+identical output to the equivalent percent substitution. For example, 
+'[v(0)]' is equivalent to '%0', and '[v(N)]' is the same is '%N'.
+Throughout this manual, however, '%0' and other percent substitutions
+will be used instead of 'v(0)', since the evaluation of percent subtitutions
+is faster than the evaluation of V-functions. 
+
+26 registers, "numbered" va-vz, are available for programming, as part
+of the "standard" collection of MUSH attributes. They may be accessed by 
+either %va, or [v(va)]. Note that the square brackets [] force something to 
+be evaluated as a string.
+
+1.50 provides the additional registers wa-wz and xa-xz. These behave
+in a manner identical to va-vz.
+
+Percent substitutions should always be used instead of functions,
+where possible. In fact, you should ALWAYS use the percent substitution,
+unless you are SURE that the function version is required -- use %N instead
+of v(N), %! instead of num(me), and so forth. There are virtually no
+situations which require the functions, and thus using the function
+versions is inefficient and wasteful. Furthermore, please note that
+it's just "%0", NOT "[%0]"; the additional square brackets cause an
+unnecessary extra evaluation and thus are inefficient.
+
+Please note that if you access something with a percent-substitution, if
+you capitalize the first letter of the substitution, then the first letter
+of the text returned will also be capitalized.
+
+The S() function forces an additional round of pronoun substitution.
+This is useful if you are evaluating a string and want to force the parser
+to substitute in the values for all (non-escaped) functions.
+
+Percents can also be used to add in special characters. %r is a carriage
+return, %t is a tab character, and %b is a blank space. To show a literal
+"%", use "%%".  '%r' is actually two characters (a carriage return and
+newline), and functions like STRLEN() will count it as two.
+
+Finally, there are temporary storage "registers", also numbered 0 through 9.
+They are set via the function SETQ(), and retrieved via the function R(),
+or through the %q-substitution. The values set via SETQ() are preserved
+through the entire command list associated with a given command. SETQ()
+is a function which just returns a blank string, and has the syntax,
+"setq(<register number>,<value>)".  "r(<register number>)" retrieves the
+value. These functions will be explained in greater detail later.
+For now, just believe that they allow you to keep values around
+temporarily. The odd name SETQ comes from the programming language LISP.
+
+======================================
+[ Example 4.1:  Percent demonstration ]
+> @sex me=female
+Set.
+> @va me=test
+Set.
+> say %va
+You say "test"
+> say %Va
+You say "Test"
+> say %N is demonstrating %p example.
+You say "Amberyl is demonstrating her example."
+> say [setq(0,testing for fun)]-- %q0
+You say "-- testing for fun"
+> say [setq(0,testing for fun)]-- %Q0
+You say "-- Testing for fun"
+======================================
+
+
+4.2   General attributes and action lists
+
+The 26 registers are often referred to as "general attributes," since
+they can be used to store anything. Often, they are good places to put
+variables. In addition to being accessible by the v-function, they can
+also be accessed by using the GET() function. The syntax for this is
+"get(object/attribute)". "[get(me/va)]" is always equivalent to "[v(va)]"
+or "%va".
+
+GET() is very similar to the v-function, except it requires an object
+to get the attribute from. It may be used to get any attribute - registers,
+descriptions, non-standard attributes, etc. When working only with one object,
+it is generally more efficient to use a v-function instead of using GET().
+
+GET_EVAL() is similar to GET(), except that it also evaluates the
+attribute. U() is also similar, and also evaluates the attribute, but
+it can be used for user-defined functions which take parameters (more
+on this later). 
+
+GET_EVAL()'s syntax is like GET()'s:  "get_eval(object/attribute)"
+U()'s basic syntax can be like either V()'s or GET()'s; either
+"u(attribute)" or "u(object/attribute)" is valid. (For information
+on how to pass parameters to U(), see a later section in this manual.)
+
+There is a subtle difference between the two functions, in addition to
+U()'s ability to take parameters
+The enactor of a GET_EVAL() is the object which is actually
+performing the GET_EVAL(); the enactor of a U() is the original enactor.
+
+======================================
+[ Example 4.2a:  GET_EVAL() vs. U() ]
+> say %!
+You say "#3"
+> @create Test
+Test created as object #1034
+> @va test=Enactor: %# -- Me: %!
+Set.
+> @vb test=$test: @pemit %#=Get_Eval: [get_eval(me/va)]%rU: [u(va)]
+Set.
+> test
+Get_Eval: Enactor: #1034 -- Me: #1034
+U: Enactor: #3 -- Me: #1034
+======================================
+
+If you're confused by the difference between GET(), GET_EVAL(), and U(),
+don't worry about it; details will be provided later, and you don't need
+to worry about the latter two functions if you're only doing very basic
+things with MUSH.
+
+* * * * *
+
+General attributes are often used to store action lists, which are
+long lists of commands, to be queued and executed. For example, you could
+@create an object called Test, and "@va Test=:explodes.; @destroy me"
+
+General attributes are usually activated by "triggers". The syntax for
+this is @trigger object/attribute. @trigger is usually abbreviated to @tr.
+Most of the time, one attribute will trigger another, but you can also type
+directly @tr object/attribute. 
+
+For example, if you typed @tr Test/va, from the example above, you would see:
+  Triggered.
+  Test explodes.
+  You get back your 10 Mark deposit for Test.
+  Test has left.
+
+You may also pass variables on the stack from attribute to attribute, using
+trigger. Often, this is a must, since the stack is cleared when something
+new is triggered. The syntax is "@tr object/attribute=thing,thing,thing,etc."
+These new things become %0, %1, %2, etc., respectively, in the triggered
+register. Almost anything can be legally passed on the stack - function
+evaluations of any type, % arguments, numbers, strings, etc.
+
+======================================
+[ Example 4.2b:  Sentence Reverser ]
+[ This object listens for four words and prints them out backwards. ]
+> @create Reverser
+Reverser created as object #25789
+> @listen reverser=* says "* * * *"
+Set.
+> @ahear reverser=@tr me/va=%4,%3,%2,%1
+[ Note that %0 is left out, since %0 is the * says - the person talking ]
+Set.
+> @va reverser="%0 %1 %2 %3
+Set.
+> drop reverser
+Reverser has left.
+Reverser has arrived.
+Dropped.
+> "First second third fourth
+You say "First second third fourth
+Reverser says "fourth third second First"
+===========================================
+
+
+4.3   The queue and delayed execution
+
+
+The queue is the list of commands that the MUSH is going to execute.
+All commands are put into it. Most are evaluated quickly, in the order
+that they enter the queue (first to last), although @trigger takes at 
+least one queue cycle to execute and @force at least two. Setting
+an attribute also takes time. One must be careful, when programming, that all
+commands are getting executed at the correct times. There is no hard and fast
+rule for this; experimentation is generally the only way to find out if your
+object is executing commands in the correct order.
+
+The queue may be checked by doing a @ps. If you have an infinite loop,
+this is likely to be very long. If you're not sure if an object of yours is
+infinite looping, @ps is a surefire way of checking. 
+
+@ps separates the queue into four sections - Player, Object, 
+Wait, and Semaphore. The player queue shows what you have triggered; the 
+object queue shows what your objects have triggered. The Wait queue shows
+commands that will be executed in the future - commands that you have queued 
+using @wait (explained below). The Semaphore queue shows semaphore countdowns 
+(explained later). The total number of queued commands is also displayed.
+
+The default @ps switch is "@ps/brief". This shows the objects
+and the commands they are running. For the wait queue, it also shows
+the time to wait. For the semaphores, it shows the object that the command
+is waiting on, and if the semaphore is using the timer option, it also
+shows the remaining time. Finally, it displays the total count of queued
+commands in each of the four categories.
+
+"@ps/long" displays all the information that "@ps/brief" does,
+plus the enactor of the object, and any variables which are being passed
+on the stack for eventual execution as part of a @trigger.
+
+"@ps/summary" shows just the total count of queued commands. Note
+that @ps defaults to displaying the queue for the individual executing
+the @ps; only wizards may specify a player name or the "/all" switch.
+In the totals line, no matter what switches are specified, the numbers
+in each category are shown as Number1/Number2. The first number is the
+number of queued commands that you have in that category; the second
+number is the total number of commands queued in that category. 
+Player and Object categories also have a "[#del]", where "#" is the
+number of commands deleted from the queue via @halt.
+
+* * * * *
+
+@ps in 1.50 is somewhat different. "@ps" with no arguments shows
+your personal queue - the objects and the commands they are running,
+and, for the wait queue, the time to wait. It also displays the total
+count of queued commands in each of the queues, in the format 
+<Number of your commands> / <Total number of commands in that queue>.
+
+"@ps all" prints the queue for all players. Wizards can also do
+"@ps *<player>" to get a queue for that player. In both cases, a queue
+count is provided.
+
+Anyone may do a "@ps count" to get a count of the number of
+queued commands.
+
+* * * * *
+
+Infinite loops on objects are dangerous. Every queued command costs 
+1/64th of a penny. Plus, if an object loops badly enough, it can severely slow
+down the game for others. If you have a loop, you can use @halt. It clears
+your personal queue. @halt <command> clears your personal queue, and adds that
+new command to the queue. @halt <object>=<new command> clears that object's
+queue and adds that new command to the queue.
+
+The other way of halting something is to set the HALT flag on it. An
+object set HALT is essentially inert - it does not @listen, @triggers and
+@force don't work on it, etc. Also, in 1.50, UFUN() and ZFUN() will return
+"#-1 OBJECT HALTED"  (recursion in a UFUN or ZFUN will automatically set
+the object HALT).
+
+The @halt command in 1.50 is slightly different. If you, or one of
+your objects, does a "@halt", it wipes out your entire queue. There is no
+way to clear the queue commands on just one object. You can also do
+@halt <player>=<new command>, which wipes out the player's entire queue
+and places the new command in it; if you are not a wizard, the player must
+be yourself. "@halt <object>" in 1.50 with no new command also sets the
+object HALT. If you just want to stop an infinite loop, use "@halt" with 
+no arguments.
+
+There is one command called @allhalt (1.50. In 2.0, it's @halt/all)
+which is wizard-only. It clears the queue for the entire MUSH, and is used 
+in emergencies. All connected players receive the message, "Your objects 
+have been globally halted by <Wizard>."
+
+* * * * *
+
+The syntax of @wait is simple:  @wait <number of seconds>=<command list>
+There is another, more complex, type of @wait which is timed on objects; 
+this type of @wait involves a "semaphore" and will be described later.
+@wait is very useful for trying to get objects to execute commands in the
+correct order, as well as for doing time-delayed sequences - for example,
+descriptions on a room that change every few hours.
+
+=============================
+[ Example 4.3:  Explosive
+[ This will create an object which explodes fifteen seconds after being
+  dropped. It gives a warning five seconds before it explodes. ]
+> @create Explosive
+Explosive created as object #23083
+> @drop explosive=You set down the explosive and ignite it.
+Set.
+> @adrop explosive=@wait 10=:pulses dangerously. It'll explode in another five
+seconds!;@wait 15={:explodes!;@destroy me}
+Set.
+> drop explosive
+Explosive has left.
+You set down the explosive and ignite it.
+[ 10 seconds pass ]
+Explosive pulses dangerously. It'll explode in another five seconds!
+[ another 5 seconds pass ]
+Explosive explodes!
+You get your 10 Marks deposit back for Explosive.
+Explosive has left.
+============================
+
+
+4.4   Decision making: @switch
+
+@switch is the closest thing to IF-THEN-ELSE on a MUSH. It is similar to
+the CASE statement in many programming languages. Its syntax is
+@switch <var>=<cond1>,<action1>,<cond2>,<action2>,<cond n>,<action n>,<default>
+@switch statements may be nested. One must be very careful about using commas
+and semi-colons when using @switch - any statements which contain either commas
+or semi-colons should be surrounded by curly braces { }. A comma will signal
+a new case/action, and a semi-colon the end of the @switch statement, if not
+in the curly braces. This is a commonly made mistake - when programming
+objects whose @switches do not appear to work, always check for misplaced
+commas or semi-colons. 
+
+One thing to note is that the variable to switch on does not have to be
+evaluated within square brackets [ ]. Percent substitutions, like %va, are
+okay to switch on, as are functions simply stated, like words(v(va)).
+
+After the variable name is ALWAYS an equals sign. @switch %va=>1,:foo
+does NOT mean "if va is greater than or equal to one, :foo". It means "if va
+is strictly greater than one, :foo". The equals sign is simply part of the
+@switch syntax. If you want greater than or equal to, you will have to use
+the GTE() function.
+
+There are two option switches to @switch, /first and /all. In 2.0, which
+one is the default will depend on the MUSH ("@list options" to see).
+
+"@switch/all" performs the actions associated with all matching
+targets. In other words, if the targets are not mutually exclusive, more
+than one set of actions may be undertaken. Its 1.50 equivalent is the
+standard "@switch" command.
+
+"@switch/first" matches the first target it can, and executes the
+statements associated with that. Even if the targets are not mutually
+exclusive, only the actions associated with the first target matched will
+be executed. The 1.50 equivalent of this is the "@select" command.
+
+=============================
+[ Example 4.4:  Dog ]
+[ The dog will respond to simple commands that someone says ]
+> @create Dog
+Dog created as object #23084
+> @listen dog=*"Dog, *"
+Set.
+> @ahear dog=@switch %1=sit,:sits down.,roll over,:rolls over obediently,play 
+  dead,:flops onto the ground.
+Set.
+> drop dog
+Dog has left.
+Dog has arrived.
+Dropped.
+> "Dog, sit
+You say "Dog, sit"
+Dog sits down.
+> "Dog, play dead"
+You say "Dog, play dead"
+Dog flops onto the ground.
+> "Dog, roll over
+You say "Dog, roll over"
+Dog rolls over obediently.
+=============================
+
+
+4.5   Other ways of triggering
+
+It is frequently useful to be able to trigger an object without having
+to pick it up, drop it, or have it listen for something. Therefore, MUSH
+provides for "using" objects. 
+
+The attributes @use, @ouse, and @ause are associated with the "use"
+command. "use <object>" triggers these three registers (note the absence of
+the @ sign in triggering). An object can only be used if there is something in
+the @ause register. The person who uses the object is shown the message in the
+@use; the other people in the room see the @ouse message. The @ause command
+list is executed. This, in essence, works just like "get" and "drop" - the
+command "use" has simply been added.
+
+========================================
+[ Example 4.4:  Bubbly pie revisited ]
+[ @using the bubbly pie performs an "eating action" and destroy. ]
+> @create Bubbly pie
+Bubbly pie created as object #30216
+> @ause pie=@emit %N gobbles down the bubbly pie.;@destroy me
+Set.
+> use pie
+You use Bubbly pie
+Elsa gobbles down the bubbly pie.
+You get your 10 Marks deposit back for Bubbly pie.
+Bubbly pie has left.
+========================================
+
+
+Another way to trigger an object is to set its @startup. The commands
+in the @startup attribute are executed whenever the MUSH is restarted.
+This is useful for objects that need to run continuously, such as clocks.
+Objects with a @startup attribute are automatically given the STARTUP flag,
+represented by "z". This flag is simply used for internal accounting and
+does not affect anything else.
+
+
+4.6   User-defined commands
+
+Perhaps one of the most common ways of triggering an object, user-defined
+commands are the closest things to MUCK @action that MUSH provides. They allow
+other players to type "command <arguments, if any>" and have that execute just
+as if the command was part of the MUSH. Unlike MUCK, however, there are few
+global user-defined commands. One must be in the same room with, or carrying,
+the object on which the command is defined. The only exceptions to this are
+exits/commands defined on the "master room". See the wizard section of this
+manual for details.
+
+These commands may be set on any register or non-standard attribute.
+The syntax is:  @<attribute> <object>=$<command>: <action list>
+The command may take arguments by using * or ?, etc., in a format similar to
+that use by @ahear/@listen.
+
+User-defined commands are matched on every object in the room or in
+your inventory, so you may want to avoid command names that might be
+extremely common. Commands on the MUSH are parsed in the order: exit
+names, defined MUSH commands (like @desc, page, etc.), then
+user-defined commands, then Master Room commands. You should be
+extremely careful not to define commands on an object like $p
+*:<action>, since this will be parsed as "page" and it will be ignored
+by the object. Furthermore, note that many MUSHes have global commands
+which begin with '+' and mailers which use '-' as an editing
+indicator; thus, you should avoid starting your own commands with
+either of those characters.
+
+In 2.0, there are config options which determine two things:
+The first is the ability of an object to trigger its own $commands. The
+second is the ability to trigger $commands on players. One can, however,
+always trigger $commands on an object one is carrying or is in the same room.
+
+
+===============================
+[ Example 4.6:  Tray of Food ]
+[ This object is a tray of food which you can "eat", "drink" and "discard" ]
+> @create Tray of Food
+Tray of Food created as object #482
+> @va food=$eat: @emit %N takes a slice of bread off the try and eats it.
+Set.
+> @vb food=$drink: @emit %N takes a cup of water off the tray and drinks it.
+Set.
+> @vc food=$discard: @emit %N discards %p tray of food;@destroy me
+Set.
+> eat
+Elsa takes a slice of bread off the tray and eats it.
+> drink
+Elsa takes a cup of water off the tray and drinks it.
+> discard
+Elsa discards her tray of food.
+You get your 10 Marks deposit back for Tray of Food.
+Tray of Food has left.
+==============================
+
+
+Sometimes it's useful to be able to find out what $commands are
+triggered in a room. 1.50's @scan command allows you to check for a
+command match on objects that you control or that are set VISUAL.
+The syntax of this command is simply "@scan <string>". It checks for
+all possible matches on your location, its contents, yourself, your
+inventory, the zone or parent room of your location, your personal
+zone, and the master room. It will display the name of any objects
+which have commands which could match that string, followed by the
+number of commands matched in brackets.
+     
+MudCore provides for similar functionality, via its '+scan' command.
+It checks for matches, starting from a specific object, and lists
+the attributes and command wildcard patterns which match (if you
+can examine the object), or the object which matches the commands
+(if you can't examine it).
+
+* * * * *
+
+One interesting and quite flexible command is "@verb". This command
+essentially allows you to define your own @attr/@oattr/@aattr triplets,
+allowing you to define your own "standard" verbs. This command is most
+useful for someone who is a wizard.
+
+This command is in the format:
+@verb <obj to read attributes off (victim)>=<obj to be told messages (actor)>,
+   <attr name>, <default message for attr>, 
+   <oattr name>, <default message for oattr>,
+   <aattr name>, <args>
+
+Most of those those fields should be self-explanatory; <args> are
+the values to be passed on the stack, as %0-%9.  For example, to simulate
+"drop" with a command like "put", you would use a user-defined command
+something like:   
+
+$put *: @verb [v(0)]=[v(N)],DROP,Dropped.,ODROP,dropped [v(0)].,ADROP
+
+Under 2.0, both the victim and actor must be controlled. Under
+1.50, either both victim and actor must be controlled, or the thing which 
+triggered the verb must be <actor> AND the object which issued the @verb
+command must be able to read the attributes from <victim>.  Essentially,
+though, one needs to be a wizard in order to make this command generally
+useful. It is, however, a rather nifty thing to play with.
+
+
+4.7   An introduction to functions
+
+Functions are generally used to manipulate strings and other input, or
+to generate or retrieve something. They are called using:
+<function-name>(<arg1>,<arg2>,<etc>)  and evaluation often requires square
+brackets [ ] to be put around the function. It is imperative that the right
+number of arguments be passed to the function, and that the parentheses are
+correctly matched. You should always use %-substitutions instead of functions
+where possible, i.e., %va instead of v(va). Functions may be nested. Only 
+one pair of square brackets is required around a given function call.
+Certain functions, such as V() and GET(), have already been introduced.
+
+Only a few functions require no arguments; TIME(), which simply
+returns the current time on the MUSH, is probably the most commonly
+used of these. All other functions require one or more arguments. The most 
+commonly used, aside from the v, s, and get() functions, is the RAND() 
+function. This generates a random integer between 0 and <number - 1>.
+There _is_ a limit to the number of arguments a function can take; you
+can find out what this is by asking a local wizard. This is generally 100.
+The limit is something to keep in mind if you are doing extremely large calls
+to a function like SWITCH(), which takes an arbitrary number of arguments.
+
+Functions used to access basic db info include NUM(), FLAGS(), OWNER(),
+LOC(), and MONEY(). These are publicly accessible, and give an object's
+database reference number, flags, owner, location (for a player), and money
+(also for a player). These functions will be discussed in more detail
+later. Other publicly accessible attributes include DESC, and
+are gotten using the GET() function. All attributes on an object set VISUAL
+are publicly accessible.
+
+Functions used to process lists will be covered later in this manual.
+The following functions are used for arithmetic: ADD(), SUB(), MUL(), DIV().
+Note that SUB() does not exist in many versions of MUSH code; instead, one
+must add the negative of the second number. Some of these functions, such
+as SUB(), take ONLY two arguments. Others, like ADD(), can take multiple
+arguments (just like LISP arithmetic operators). For example,
+"add(2,3,4)" is equivalent to (and more efficient than) "add(2,add(3,4))".
+
+=============================
+[ Example 4.7a:  Abacus ]
+[ An object that performs arithmetic ]
+> @create Abacus
+Abacus created as object #19831
+> @va abacus=$*+*: @emit The sum of %0 and %1 is [add(%0,%1)].
+Set.
+> @vb abacus=$*-*: @emit The difference of %0 and %1 is [sub(%0,%1)].
+Set.
+> @vc abacus=$*x*: @emit The product of %0 and %1 is [mul(%0,%1)].
+Set.
+> @vd abacus=$*/*: @emit The quotient of %0 and %1 is [div(%0,%1)].
+Set.
+> 1+2
+The sum of 1 and 2 is 3.
+> 2x6
+The product of 2 and 6 is 12.
+> 8-5
+The difference of 8 and 5 is 3.
+> 9/3
+The quotient of 9 and 3 is 3.
+==============================
+
+Here's another example, demonstrating the combined use of @switch and RAND(),
+"use", and various %-substitutions.
+
+======================================
+[ Example 4.7b:  Plush Shaav Doll ]
+[ To conserve space, 'Set.' messages after attribute sets have been omitted. ]
+
+> @create Life-size Plush Shaav Doll
+Life-size Plush Shaav Doll created as object #3895
+> @desc doll=This is a plush doll nearly six feet in height. It's fuzzy and
+  and cute, featuring the Grand Hierarch Shaav wearing his usual calm
+  expression, although the effect is somewhat spoiled by the fluffy stuffing
+  and bright green-button eyes. The life-sized doll is clothed in the black
+  robes of the Grolims, and would probably seem to radiate evil if it didn't
+  look so snuggly. It's probably made by the same people who made Belzoinks.
+> @succ doll=You prop up a life-sized plush doll of Shaav.
+> @osucc doll=grins evilly as %s props up a life-sized plush doll of Shaav.
+> @drop doll=You drop a life-sized plush doll of Shaav on its head.
+> @odrop doll=drops a life-sized plush doll of Shaav on its head.
+> @use doll=You pull a string on the doll's neck.
+> @ouse doll=pulls on a string on the plush Shaav doll's neck.
+> @ause doll=@switch rand(4)=
+    0, {:points a finger at %N and squeaks. "Die!"},
+    1, {:screams:%tDeath!%tDestruction!%tChaos!},
+    2, {:looks at %N for a moment, then booms to %o, "DOOM."},
+    3, {:squeaks. "Mama!%b%bMama!%b%bMama!"}
+
+[ If Polgara (a female) types "use doll", she sees "You pull a string on the
+  doll's neck", plus one of the following messages: ]
+
+Life-size Plush Shaav Doll points a finger at Polgara and squeaks. "Die!"
+Life-size Plush Shaav Doll screams:	Death!	Destruction!	Chaos!
+Life-size Plush Shaav Doll looks at Polgara for a moment, then booms to
+  her, "DOOM."
+Life-size Plush Shaav Doll squeaks. "Mama!  Mama!  Mama!"
+
+Note the use of "%b" and "%t" substitutions for blank spaces and
+tabs. Because "%t" inserts a literal tab character, the spacing will
+vary depending on where tab stops are set by the player's terminal.
+Also note that the @switch action clauses had to be enclosed in braces,
+since the statements used inside contained commas.
+
+==============================
+
+
+4.8   Do it! -- falcon control
+
+This section assumes that you have created the falcon as per section
+2.9 of this manual. The object you will create in this example will be used
+to control it. <#FL> below refers to the dbref number of your falcon,
+and <FL> refers to the name of your falcon.
+
+The controller will give you the ability to force your falcon
+remotely to pose and think messages, return to you on command, and go to a
+player on command, using: '<message>  to think a message, .<pose> to pose 
+something, return to recall the falcon, and goto <player> to go to a
+player's location.
+
+Issue the following commands:
+
+@create <FL>'s controller
+[ Then lock it, desc it, etc. ]
+
+@va controller=$'*: @fo <#FL>=:chirps << %0 >>
+[ This is used for "speech" ]
+
+@vb controller=$.*: @fo <#FL>=:%0
+[ This is used for forcing the falcon to pose ]
+
+@vc controller=$fly *: @fo <#FL>={:soars into the air and flies off.; %0}
+[ This is used to have the falcon fly in a given direction ]
+
+@vd controller=$return: @fo <#FL>={:returns to %N.; @set me=!puppet;
+    @tel me=owner(me); leave; :soars towards you!; @set me=puppet}
+[ This brings the falcon back to you, with appropriate messages. The
+  INHERIT flag must be set in order for this to work. ]
+
+@ve controller=$goto *: @fo <#FL>={@switch loc(*%0)=#-1,{p <your name>=I can't
+    find %0}, {:goes to find %0.; @tel me=loc(*%0); :soars towards you!}}
+[ This is used to go to the location of a player. It first checks to see if 
+  the player can be found - if the player does not exist or the player is set
+  UNFINDABLE, #-1 is returned and the falcon pages the player with the
+  fail message - and then, if the player exists, teleports to that player's
+  location, with appropriate messages. ]
+    
+
+INDEX OF SECTION II EXAMPLES:
+
+3.1   Living Room
+3.5   Home
+4.1   Percent demonstration
+4.2a  GET_EVAL() vs. U()
+4.2b  Sentence Reverser
+4.3   Explosive
+4.4   Dog
+4.5   Bubbly pie revisited
+4.6   Tray of food
+4.7a  Abacus
+4.7b  Plush Shaav Doll
+4.8   Falcon control
